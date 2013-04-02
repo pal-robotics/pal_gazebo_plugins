@@ -1,0 +1,9 @@
+<stack>
+  <description brief="pal_gazebo_plugins"></description>
+  <author>Maintained by Luca Marchionni</author>
+  <license>Modified BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pal_gazebo_plugins</url>
+  <depend stack="ros" />
+  <depend stack="geometry" />
+</stack>

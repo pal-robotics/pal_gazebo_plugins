@@ -1,0 +1,25 @@
+<package>
+  <description brief="pal_gazebo_plugins">
+
+     pal_gazebo_plugins
+
+  </description>
+  <author>Luca Marchionni</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/pal_gazebo_plugins</url>
+
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="tf"/>
+
+  <!--Dependencies required only by openni plugin-->
+  <depend package="atlas_msgs" />
+  <depend package="dynamic_reconfigure" />
+  <depend package="driver_base" />
+  <depend package="image_transport" />
+  <depend package="pcl_ros" />
+
+</package>
+
+
