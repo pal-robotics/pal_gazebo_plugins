@@ -1,18 +1,20 @@
 #include "gazebo_ros_range.h"
+
 #include <algorithm>
 #include <string>
 #include <assert.h>
 
-#include "gazebo/physics/World.hh"
-#include "gazebo/physics/HingeJoint.hh"
-#include "gazebo/sensors/Sensor.hh"
-#include "gazebo/sdf/interface/SDF.hh"
-#include "gazebo/sdf/interface/Param.hh"
-#include "gazebo/common/Exception.hh"
-#include "gazebo/sensors/RaySensor.hh"
-#include "gazebo/sensors/SensorTypes.hh"
+#include <gazebo/physics/World.hh>
+#include <gazebo/physics/HingeJoint.hh>
+#include <gazebo/sensors/Sensor.hh>
+#include <gazebo/common/Exception.hh>
+#include <gazebo/sensors/RaySensor.hh>
+#include <gazebo/sensors/SensorTypes.hh>
 
-#include "tf/tf.h"
+#include <sdf/sdf.hh>
+#include <sdf/Param.hh>
+
+#include <tf/tf.h>
 
 namespace gazebo
 {
@@ -62,7 +64,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   this->robot_namespace_ = "";
   if (this->sdf->HasElement("robotNamespace"))
-    this->robot_namespace_ = this->sdf->GetValueString("robotNamespace") + "/";
+    this->robot_namespace_ = this->sdf->Get<std::string>("robotNamespace") + "/";
 
   if (!this->sdf->HasElement("frameName"))
   {
@@ -70,7 +72,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     this->frame_name_ = "/world";
   }
   else
-    this->frame_name_ = this->sdf->GetValueString("frameName");
+    this->frame_name_ = this->sdf->Get<std::string>("frameName");
 
   if (!this->sdf->HasElement("topicName"))
   {
@@ -78,7 +80,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     this->topic_name_ = "/world";
   }
   else
-    this->topic_name_ = this->sdf->GetValueString("topicName");
+    this->topic_name_ = this->sdf->Get<std::string>("topicName");
 
   if (!this->sdf->HasElement("radiation"))
   {
@@ -87,7 +89,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   }
   else
-      this->radiation_ = _sdf->GetElement("radiation")->GetValueString();
+      this->radiation_ = _sdf->GetElement("radiation")->Get<std::string>();
 
   if (!this->sdf->HasElement("fov"))
   {
@@ -95,14 +97,14 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
       this->fov_ = 0.05;
   }
   else
-      this->fov_ = _sdf->GetElement("fov")->GetValueDouble();
+      this->fov_ = _sdf->GetElement("fov")->Get<double>();
   if (!this->sdf->HasElement("gaussianNoise"))
   {
     ROS_INFO("Laser plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0;
   }
   else
-    this->gaussian_noise_ = this->sdf->GetValueDouble("gaussianNoise");
+    this->gaussian_noise_ = this->sdf->Get<double>("gaussianNoise");
 
 
 
@@ -112,7 +114,7 @@ void GazeboRosRange::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
     this->update_rate_ = 0;
   }
   else
-    this->update_rate_ = this->sdf->GetValueDouble("updateRate");
+    this->update_rate_ = this->sdf->Get<double>("updateRate");
 
   // prepare to throttle this plugin at the same rate
   // ideally, we should invoke a plugin update when the sensor updates,

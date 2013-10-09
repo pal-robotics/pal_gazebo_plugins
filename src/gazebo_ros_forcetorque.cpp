@@ -34,14 +34,14 @@ void FTPlugin::Load(sensors::SensorPtr _sensor,
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace"))
     this->robot_namespace_ =
-      _sdf->GetElement("robotNamespace")->GetValueString() + "/";
+      _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
 
   // "publishing contact/collisions to this topic name: "
   //   << this->bumper_topic_name_ << std::endl;
   this->topic_name_ = "ft_data";
   if (_sdf->GetElement("topicName"))
     this->topic_name_ =
-      _sdf->GetElement("topicName")->GetValueString();
+      _sdf->GetElement("topicName")->Get<std::string>();
 
   // "transform contact/collisions pose, forces to this body (link) name: "
   //   << this->frame_name_ << std::endl;
@@ -51,7 +51,7 @@ void FTPlugin::Load(sensors::SensorPtr _sensor,
     this->frame_name_ = "world";
   }
   else
-    this->frame_name_ = _sdf->GetElement("frameName")->GetValueString();
+    this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
 
   this->update_rate_ = 100.0;
   if (!_sdf->HasElement("updateRate"))
@@ -59,7 +59,7 @@ void FTPlugin::Load(sensors::SensorPtr _sensor,
     ROS_INFO("ft sensor plugin missing <updateRate>, defaults to %f", this->update_rate_);
   }
   else
-    this->update_rate_ = _sdf->GetElement("updateRate")->GetValueDouble();
+    this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
 
 //  this->model = _sensor;
 
@@ -150,13 +150,13 @@ void FTPlugin::UpdateChild()
             for (int j = 0; j < contacts.contact(i).position_size(); ++j)
             {
                 fTotal += math::Vector3(
-                            contacts.contact(i).wrench(j).body_1_force().x(),
-                            contacts.contact(i).wrench(j).body_1_force().y(),
-                            contacts.contact(i).wrench(j).body_1_force().z());
+                            contacts.contact(i).wrench(j).body_1_wrench().force().x(),
+                            contacts.contact(i).wrench(j).body_1_wrench().force().y(),
+                            contacts.contact(i).wrench(j).body_1_wrench().force().z());
                 tTotal += math::Vector3(
-                            contacts.contact(i).wrench(j).body_1_torque().x(),
-                            contacts.contact(i).wrench(j).body_1_torque().y(),
-                            contacts.contact(i).wrench(j).body_1_torque().z());
+                            contacts.contact(i).wrench(j).body_1_wrench().torque().x(),
+                            contacts.contact(i).wrench(j).body_1_wrench().torque().y(),
+                            contacts.contact(i).wrench(j).body_1_wrench().torque().z());
             }
             // low pass filter over time
             double e = 0.99;
