@@ -2,7 +2,7 @@
   <name>pal_gazebo_plugins</name>
   <version>1.0.0</version>
   <description>
-    Robot-independent Gazebo plugins for sensors, motors and dynamic reconfigurable components.
+    Robot-independent Gazebo plugins used by PAL Robotics.
   </description>
 
   <maintainer email="adolfo.rodriguez@pal-robotics.com">Adolfo Rodriguez Tsouroukdissian</maintainer>
