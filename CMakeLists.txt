@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pal_gazebo_plugins)
 
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS tf)
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
