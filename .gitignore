@@ -1,6 +1,0 @@
-build
-lib
-docs
-src/pal_gazebo_plugins
-cfg/cpp
-cfg/GazeboRosOpenniKinect.cfgc
