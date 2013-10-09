@@ -13,7 +13,6 @@
 #include <ros/advertise_options.h>
 #include <sensor_msgs/Range.h>
 
-#include <gazebo/sdf/interface/Param.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
@@ -23,6 +22,7 @@
 #include <gazebo/sensors/SensorTypes.hh>
 #include <gazebo/plugins/RayPlugin.hh>
 
+#include <sdf/Param.hh>
 
 namespace gazebo
 {
