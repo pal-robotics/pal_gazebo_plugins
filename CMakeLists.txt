@@ -45,5 +45,8 @@ install(DIRECTORY include/
    FILES_MATCHING PATTERN "*.h"
 )
 
+install(DIRECTORY launch/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch)
+
 install(PROGRAMS scripts/run_gazebo scripts/run_gzfactory
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

@@ -1,0 +1,8 @@
+<launch>
+  <arg name="gzmodel"/>
+  <arg name="gzpose"  default="-x 0 -y 0 -z 0.0 -R 0.0 -P 0.0 -Y 0.0"/>
+
+  <!-- Push robot_description to factory and spawn robot in gazebo -->
+  <node name="gzfactory" pkg="pal_gazebo_plugins" type="run_gzfactory" args="spawn -f $(arg gzmodel) $(arg gzpose)" output="screen"/>
+</launch>
+
