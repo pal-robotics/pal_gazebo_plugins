@@ -1,6 +1,6 @@
-#include <string>
+#include "pal_gazebo_plugins/gazebo_ros_forcetorque.h"
 
-#include "gazebo_ros_forcetorque.h"
+#include <string>
 
 using std::string;
 

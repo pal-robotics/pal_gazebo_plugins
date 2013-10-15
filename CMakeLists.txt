@@ -13,11 +13,11 @@ include_directories(include ${catkin_INCLUDE_DIRS}
                             ${SDFormat_INCLUDE_DIRS})
 
 catkin_package(
+  INCLUDE_DIRS include
   LIBRARIES gazebo_ros_range
             gazebo_ros_forcetorque
             pal_model_plugin
-  DEPENDS
-    gazebo
+  DEPENDS gazebo
   )
 
 link_directories(${GAZEBO_LIBRARY_DIRS})

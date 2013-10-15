@@ -1,4 +1,4 @@
-#include "gazebo_ros_range.h"
+#include "pal_gazebo_plugins/gazebo_ros_range.h"
 
 #include <algorithm>
 #include <string>

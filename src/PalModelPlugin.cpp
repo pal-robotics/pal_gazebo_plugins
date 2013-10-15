@@ -1,7 +1,8 @@
+#include "pal_gazebo_plugins/PalModelPlugin.h"
+
 #include <map>
 #include <string>
 
-#include "PalModelPlugin.h"
 
 namespace gazebo
 {
