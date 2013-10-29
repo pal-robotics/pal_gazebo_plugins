@@ -22,9 +22,6 @@ catkin_package(
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
-add_library(pal_model_plugin src/PalModelPlugin.cpp)
-target_link_libraries(pal_model_plugin ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
-
 ## Plugins
 add_library(gazebo_ros_range src/gazebo_ros_range.cpp)
 target_link_libraries(gazebo_ros_range ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${SDFormat_LIBRARIES} RayPlugin)
