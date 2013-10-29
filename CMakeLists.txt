@@ -16,7 +16,6 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gazebo_ros_range
             gazebo_ros_forcetorque
-            pal_model_plugin
   DEPENDS gazebo
   )
 
@@ -32,7 +31,6 @@ target_link_libraries(gazebo_ros_forcetorque ${GAZEBO_LIBRARIES} ${catkin_LIBRAR
 install(TARGETS
   gazebo_ros_range
   gazebo_ros_forcetorque
-  pal_model_plugin
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
