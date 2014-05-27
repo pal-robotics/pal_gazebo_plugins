@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pal_gazebo_plugins)
 
-find_package(catkin REQUIRED COMPONENTS tf)
+find_package(catkin REQUIRED COMPONENTS tf pal_multirobot_msgs roscpp)
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
@@ -17,6 +17,7 @@ catkin_package(
   LIBRARIES gazebo_ros_range
             gazebo_ros_forcetorque
             gazebo_pal_hand
+            gazebo_wifi_ap
   DEPENDS gazebo
   )
 
@@ -32,10 +33,14 @@ target_link_libraries(gazebo_ros_forcetorque ${GAZEBO_LIBRARIES} ${catkin_LIBRAR
 add_library(gazebo_pal_hand src/gazebo_pal_hand.cpp)
 target_link_libraries(gazebo_pal_hand ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
+add_library(gazebo_wifi_ap src/gazebo_wifi_ap.cpp)
+target_link_libraries(gazebo_wifi_ap ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(gazebo_wifi_ap pal_multirobot_msgs_generate_messages_cpp)
 install(TARGETS
   gazebo_ros_range
   gazebo_ros_forcetorque
   gazebo_pal_hand
+  gazebo_wifi_ap
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
