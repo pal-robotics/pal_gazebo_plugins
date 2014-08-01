@@ -106,28 +106,6 @@ namespace gazebo {
       this->max_value_ = _sdf->GetElement("max_value")->Get<double>();
     }
 
-    this->min_value_ = -100.0;
-    if (!_sdf->HasElement("min_value")) {
-      ROS_WARN("GazeboWifiAP Plugin missing <min_value>, defaults to \"%f\"", this->min_value_);
-    } else {
-      this->min_value_ = _sdf->GetElement("min_value")->Get<double>();
-    }
-
-    this->max_range_ = 100.0;
-    if (!_sdf->HasElement("max_range")) {
-      ROS_WARN("GazeboWifiAP Plugin missing <max_range>, defaults to \"%f\"", this->max_range_);
-    } else {
-      this->max_range_ = _sdf->GetElement("max_range")->Get<double>();
-    }
-
-
-    this->sigma_ = 1.0;
-    if (!_sdf->HasElement("sigma")) {
-      ROS_WARN("GazeboWifiAP Plugin missing <sigma>, defaults to \"%f\"", this->sigma_);
-    } else {
-      this->sigma_ = _sdf->GetElement("sigma")->Get<double>();
-    }
-
     // ros callback queue for processing subscription
     this->deferredLoadThread_ = boost::thread(
       boost::bind(&GazeboWifiAP::DeferredLoad, this));
@@ -193,10 +171,11 @@ namespace gazebo {
 
         math::Pose diff_pose  = (robot_ptr_->GetWorldPose() - parent_->GetWorldPose());
         double ray_dist = sqrt(diff_pose.pos.GetSquaredLength());
-        ROS_ERROR_STREAM("ray dist  " << ray_dist );
+        //ROS_ERROR_STREAM("ray dist  " << ray_dist );
 
 
-        double signal_strength =  (max_value_ - min_value_)*(1./(sigma_*sqrt(2.0*M_PI)))*exp(-0.5*pow(-ray_dist/sigma_,2)) + min_value_;
+        //double signal_strength =  (max_value_ - min_value_)*(1./(sigma_*sqrt(2.0*M_PI)))*exp(-0.5*pow(-ray_dist/sigma_,2)) + min_value_;
+        double signal_strength = max_value_ - (20*log10((4*M_PI*ray_dist)/0.125));
 
         pal_multirobot_msgs::WifiServiceDetection msg;
         msg.header.stamp = ros::Time::now();
