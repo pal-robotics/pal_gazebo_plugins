@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pal_gazebo_plugins)
 
-find_package(catkin REQUIRED COMPONENTS tf pal_multirobot_msgs roscpp)
+find_package(catkin REQUIRED COMPONENTS control_toolbox tf pal_multirobot_msgs roscpp)
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
