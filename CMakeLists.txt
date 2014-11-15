@@ -7,7 +7,8 @@ find_package(catkin REQUIRED
     std_srvs
     tf
     pal_multirobot_msgs
-    roscpp)
+    roscpp
+    control_toolbox)
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
@@ -30,6 +31,7 @@ catkin_package(
     tf
     pal_multirobot_msgs
     roscpp
+    control_toolbox
   DEPENDS gazebo)
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
