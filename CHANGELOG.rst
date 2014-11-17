@@ -2,8 +2,8 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2014-11-17)
+------------------
 * Added plugin for harnessing the robot in simulation
 * Adding plugin for wifi access point simulation in gazebo
 * Simple plugin to move underactuated finger joints
