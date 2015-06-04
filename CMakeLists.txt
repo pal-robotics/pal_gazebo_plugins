@@ -19,6 +19,7 @@ include_directories(include ${catkin_INCLUDE_DIRS}
                             ${Boost_INCLUDE_DIRS}
                             ${SDFormat_INCLUDE_DIRS})
 
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gazebo_ros_range
@@ -33,7 +34,9 @@ catkin_package(
     pal_multirobot_msgs
     roscpp
     control_toolbox
-  DEPENDS gazebo)
+  DEPENDS
+    GAZEBO
+    Boost)
 
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
