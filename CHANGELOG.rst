@@ -2,6 +2,14 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove Paul from maintainer
+* Fix catkin_package dependency
+* Add build and run depends on gazebo
+* Add generic underactuated finger plugin for gazebo simulation
+* Contributors: Luca Marchionni
+
 1.0.1 (2014-11-17)
 ------------------
 * Added plugin for harnessing the robot in simulation
