@@ -2,8 +2,8 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.0 (2015-06-05)
+------------------
 * Remove Paul from maintainer
 * Fix catkin_package dependency
 * Add build and run depends on gazebo
