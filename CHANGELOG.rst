@@ -2,8 +2,8 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.1 (2016-04-15)
+------------------
 * Remove gazebo_ros_range, already merged into upstream gazebo_plugins
 * Contributors: Victor Lopez
 
