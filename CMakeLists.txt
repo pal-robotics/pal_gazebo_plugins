@@ -22,8 +22,7 @@ include_directories(include ${catkin_INCLUDE_DIRS}
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES gazebo_ros_range
-            gazebo_ros_forcetorque
+  LIBRARIES gazebo_ros_forcetorque
             gazebo_pal_hand
             gazebo_wifi_ap
             gazebo_underactuated_finger
@@ -41,9 +40,6 @@ catkin_package(
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Plugins
-add_library(gazebo_ros_range src/gazebo_ros_range.cpp)
-target_link_libraries(gazebo_ros_range ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${SDFormat_LIBRARIES} RayPlugin)
-
 add_library(gazebo_ros_forcetorque src/gazebo_ros_forcetorque.cpp)
 target_link_libraries(gazebo_ros_forcetorque ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
@@ -61,7 +57,6 @@ add_library(gazebo_underactuated_finger src/gazebo_underactuated_finger.cpp)
 target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
 install(TARGETS
-  gazebo_ros_range
   gazebo_ros_forcetorque
   gazebo_pal_hand
   gazebo_wifi_ap
