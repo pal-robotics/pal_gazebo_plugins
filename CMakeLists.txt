@@ -20,6 +20,8 @@ include_directories(include ${catkin_INCLUDE_DIRS}
                             ${SDFormat_INCLUDE_DIRS})
 
 
+# Remove wrongly placed link flag in GAZEBO_LIBRARIES
+string(REPLACE "-lpthread;" "" GAZEBO_LIBRARIES "${GAZEBO_LIBRARIES}")
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES gazebo_ros_forcetorque
