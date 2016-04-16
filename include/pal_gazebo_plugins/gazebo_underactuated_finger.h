@@ -70,7 +70,11 @@ namespace gazebo {
       std::vector<std::string> virtual_joint_names_;
 
       physics::JointPtr actuated_joint_;
+
       std::vector<physics::JointPtr> virtual_joints_;
+      typedef boost::shared_ptr<control_toolbox::Pid> PidPtr;
+      std::vector<PidPtr> pids_;
+
       std::vector<double> scale_factors_;
 
       math::Angle actuator_angle_;

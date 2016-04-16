@@ -119,6 +119,7 @@ namespace gazebo {
     actuated_joint_ = joint;
     actuator_angle_ = actuated_joint_->GetAngle(0u);
 
+   ros::NodeHandle nh;
    for(unsigned int i=0 ; i<virtual_joint_names_.size(); ++i)
    {
      gazebo::physics::JointPtr joint = this->parent->GetJoint(virtual_joint_names_.at(i));
@@ -130,7 +131,16 @@ namespace gazebo {
                 this->robot_namespace_.c_str(), this->virtual_joint_names_.at(i).c_str());
        gzthrow(error);
      }
+
+       ROS_ERROR_STREAM("PARSED UNERDACTUATED JOINT: "<<this->virtual_joint_names_.at(i));
+       const ros::NodeHandle pid_nh(nh, "gains/" + this->virtual_joint_names_.at(i));
        virtual_joints_.push_back(joint);
+       PidPtr pid(new control_toolbox::Pid());
+       const bool has_pid = pid->init(pid_nh, true); // true == quiet
+       if(!has_pid){
+         ROS_ERROR_STREAM("Did not find a pid configutation in the param server");
+       }
+       pids_.push_back(pid);
    }
     // listen to the update event (broadcast every simulation iteration)
     this->update_connection_ =
@@ -159,7 +169,11 @@ namespace gazebo {
       if(new_angle < virtual_joints_.at(i)->GetLowerLimit(0u))
         new_angle = virtual_joints_.at(i)->GetLowerLimit(0u);
 
-      virtual_joints_.at(i)->SetAngle(0u, new_angle);
+      double pos = virtual_joints_.at(i)->GetAngle(0).Radian();
+      double error = new_angle.Radian() - pos;
+      const double effort = pids_.at(i)->computeCommand(error, ros::Duration(0.001));
+      virtual_joints_.at(i)->SetForce(0, effort);
+     // virtual_joints_.at(i)->SetAngle(0u, new_angle);
     }
   }
 
