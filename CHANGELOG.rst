@@ -2,6 +2,17 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Merge branch 'finget_plugin_pid' into 'dubnium-devel'
+  Finget plugin pid
+  See merge request !1
+* Being a bit more verbose on the initialization of the pluginç
+* Cleanup
+* Changed from set position to pid in finger plugin
+* Remove wrongly placed link flag in GAZEBO_LIBRARIES
+* Contributors: Hilario Tome, Sam Pfeiffer, Victor Lopez
+
 1.1.1 (2016-04-15)
 ------------------
 * Remove gazebo_ros_range, already merged into upstream gazebo_plugins
