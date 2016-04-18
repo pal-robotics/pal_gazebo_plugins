@@ -2,8 +2,8 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.2 (2016-04-18)
+------------------
 * Merge branch 'finget_plugin_pid' into 'dubnium-devel'
   Finget plugin pid
   See merge request !1
