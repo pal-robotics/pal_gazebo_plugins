@@ -146,7 +146,14 @@ namespace gazebo {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboPalHey5::UpdateChild, this));
 
-    ROS_INFO_STREAM("Initialized GazeboPalHey5 finger with actuator: " <<  this->actuated_joint_name_);
+   std::string init_str = "Initialized GazeboPalHey5 finger with actuator: " + this->actuated_joint_name_;
+   init_str += " and virtual joints: ";
+   for(unsigned int i=0 ; i<virtual_joint_names_.size(); ++i)
+   {
+     init_str += this->virtual_joint_names_.at(i);
+     init_str += " ";
+   }
+    ROS_INFO_STREAM(init_str);
   }
 
   // Update the controller
