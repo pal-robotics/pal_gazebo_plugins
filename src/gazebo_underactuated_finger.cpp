@@ -132,13 +132,12 @@ namespace gazebo {
        gzthrow(error);
      }
 
-       ROS_ERROR_STREAM("PARSED UNERDACTUATED JOINT: "<<this->virtual_joint_names_.at(i));
        const ros::NodeHandle pid_nh(nh, "gains/" + this->virtual_joint_names_.at(i));
        virtual_joints_.push_back(joint);
        PidPtr pid(new control_toolbox::Pid());
        const bool has_pid = pid->init(pid_nh, true); // true == quiet
        if(!has_pid){
-         ROS_ERROR_STREAM("Did not find a pid configutation in the param server");
+         ROS_ERROR_STREAM("Did not find a pid configutation in the param server for " << this->virtual_joint_names_.at(i));
        }
        pids_.push_back(pid);
    }
@@ -147,6 +146,7 @@ namespace gazebo {
       event::Events::ConnectWorldUpdateBegin(
           boost::bind(&GazeboPalHey5::UpdateChild, this));
 
+    ROS_INFO_STREAM("Initialized GazeboPalHey5 finger with actuator: " <<  this->actuated_joint_name_);
   }
 
   // Update the controller
@@ -173,7 +173,6 @@ namespace gazebo {
       double error = new_angle.Radian() - pos;
       const double effort = pids_.at(i)->computeCommand(error, ros::Duration(0.001));
       virtual_joints_.at(i)->SetForce(0, effort);
-     // virtual_joints_.at(i)->SetAngle(0u, new_angle);
     }
   }
 
