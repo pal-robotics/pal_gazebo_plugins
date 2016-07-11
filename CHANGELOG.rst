@@ -2,8 +2,8 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.1.3 (2016-07-11)
+------------------
 * Changed set force to set angle in gazebo underactuated finger plugin
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
