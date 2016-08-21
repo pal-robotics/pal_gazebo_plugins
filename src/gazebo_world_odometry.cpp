@@ -4,7 +4,7 @@
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 #include <cmath>
-#include <sensor_msgs/JointState.h>
+#include <nav_msgs/Odometry.h>
 
 namespace gazebo {
 
@@ -80,7 +80,7 @@ namespace gazebo {
     }
 
     this->rosNode_ = new ros::NodeHandle(this->robot_namespace_);
-    floatingBasePub_ = this->rosNode_->advertise<sensor_msgs::JointState>(topic_name_, 100);
+    floatingBasePub_ = this->rosNode_->advertise<nav_msgs::Odometry>(topic_name_, 100);
 
     // ros callback queue for processing subscription
     this->callbackQueeuThread = boost::thread(
@@ -100,50 +100,39 @@ namespace gazebo {
     boost::mutex::scoped_lock sclock(this->mutex_);
 
     gazebo::math::Pose pose;
-    gazebo::math::Quaternion q;
-    gazebo::math::Vector3 pos;
+    gazebo::math::Quaternion orientation;
+    gazebo::math::Vector3 position;
 
     pose = this->link->GetWorldPose();
-    pos = pose.pos;
-    q = pose.rot;
+    position = pose.pos;
+    orientation = pose.rot;
 
-    gazebo::math::Vector3 gazebo_rpy =  pose.rot.GetAsEuler();
+//    gazebo::math::Vector3 linearVel = this->link->GetWorldLinearVel();
+//    gazebo::math::Vector3 angularVel = this->link->GetWorldAngularVel();
 
-    gazebo::math::Vector3 vpos = this->link->GetWorldLinearVel();
-    gazebo::math::Vector3 veul = this->link->GetWorldAngularVel();
-    double vrpy[3];
-    vrpy[0] = veul[2];
-    vrpy[1] = veul[1];
-    vrpy[2] = veul[0];
+    gazebo::math::Vector3 linearVel = this->link->GetWorldLinearVel();
+    gazebo::math::Vector3 angularVel = this->link->GetRelativeAngularVel();
 
-    double res[3];
-    threeaxisrot(2.*(q.x*q.y + q.w*q.z),
-                 q.w*q.w + q.x*q.x - q.y*q.y - q.z*q.z,
-                 -2*(q.x*q.z - q.w*q.y),
-                 2*(q.y*q.z + q.w*q.x),
-                 q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
-                 res);
+    nav_msgs::Odometry odomMsg;
 
-    double rpy[3];
-    rpy[0] = res[2];
-    rpy[1] = res[1];
-    rpy[2] = res[0];
+    odomMsg.pose.pose.position.x = position.x;
+    odomMsg.pose.pose.position.y = position.y;
+    odomMsg.pose.pose.position.z = position.z;
 
-    sensor_msgs::JointState floatingJoinstaStates;
-    floatingJoinstaStates.position.resize(6);
-    floatingJoinstaStates.velocity.resize(6);
-    for(size_t i=0; i<3; ++i){
-      floatingJoinstaStates.position[i] = pos[i];
-      floatingJoinstaStates.velocity[i] = vpos[i];
-    }
-    for(size_t i=0; i<3; ++i){
-//      floatingJoinstaStates.position[i + 3] = rpy[i];
-      floatingJoinstaStates.position[i + 3] = gazebo_rpy[i];
-//      floatingJoinstaStates.velocity[i + 3] = vrpy[i];
-      floatingJoinstaStates.velocity[i + 3] = veul[i];
+    odomMsg.pose.pose.orientation.x = orientation.x;
+    odomMsg.pose.pose.orientation.y = orientation.y;
+    odomMsg.pose.pose.orientation.z = orientation.z;
+    odomMsg.pose.pose.orientation.w = orientation.w;
 
-    }
-    floatingBasePub_.publish(floatingJoinstaStates);
+    odomMsg.twist.twist.linear.x = linearVel.x;
+    odomMsg.twist.twist.linear.y = linearVel.y;
+    odomMsg.twist.twist.linear.z = linearVel.z;
+
+    odomMsg.twist.twist.angular.x = angularVel.x;
+    odomMsg.twist.twist.angular.y = angularVel.y;
+    odomMsg.twist.twist.angular.z = angularVel.z;
+
+    floatingBasePub_.publish(odomMsg);
   }
 
 
