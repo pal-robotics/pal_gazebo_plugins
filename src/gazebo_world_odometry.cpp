@@ -38,20 +38,20 @@ namespace gazebo {
 
     if (!_sdf->HasElement("frameName"))
     {
-      ROS_INFO("ft sensor plugin missing <frameName>, defaults to world");
+      ROS_INFO("world odometry sensor plugin missing <frameName>, defaults to world");
       this->frame_name_ = "world";
     }
     else
       this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
 
     this->world_ = parent_model->GetWorld();
-    std::string link_name_ = "base_link";
+    std::string link_name_ = frame_name_;
     // assert that the body by link_name_ exists
     this->link = boost::dynamic_pointer_cast<gazebo::physics::Link>(
       this->world_->GetEntity(link_name_));
     if (!this->link)
     {
-      ROS_FATAL("gazebo_ros_imu plugin error: bodyName: %s does not exist\n",
+      ROS_FATAL("gazebo_ros_world_ogometry plugin error: bodyName: %s does not exist\n",
         link_name_.c_str());
     }
 
@@ -131,6 +131,8 @@ namespace gazebo {
     odomMsg.twist.twist.angular.x = angularVel.x;
     odomMsg.twist.twist.angular.y = angularVel.y;
     odomMsg.twist.twist.angular.z = angularVel.z;
+
+    odomMsg.header.frame_id = frame_name_;
 
     floatingBasePub_.publish(odomMsg);
   }
