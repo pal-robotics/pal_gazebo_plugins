@@ -2,6 +2,12 @@
 Changelog for package pal_gazebo_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.3 (2016-07-11)
+------------------
+* Changed set force to set angle in gazebo underactuated finger plugin
+* Added gazebo world odometry that outputs rpy
+* Contributors: Hilario Tome
+
 1.1.2 (2016-04-18)
 ------------------
 * Merge branch 'finget_plugin_pid' into 'dubnium-devel'
