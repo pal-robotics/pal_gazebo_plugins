@@ -8,7 +8,8 @@ find_package(catkin REQUIRED
     tf
     pal_multirobot_msgs
     roscpp
-    control_toolbox)
+    control_toolbox
+    nav_msgs)
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
