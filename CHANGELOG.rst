@@ -8,8 +8,8 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+1.1.4 (2016-10-14)
+------------------
 * Added missing depend
 * Merge branch 'dubnium-devel' of gitlab:common/pal_gazebo_plugins into dubnium-devel
 * Removed hardcoded base name in gazebo world odometry
