@@ -8,6 +8,18 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Added missing depend
+* Merge branch 'dubnium-devel' of gitlab:common/pal_gazebo_plugins into dubnium-devel
+* Removed hardcoded base name in gazebo world odometry
+* Changed world odom to use quaternion intstead of rpy
+* 1.1.3
+* Updated changelog
+* Changed set force to set angle in gazebo underactuated finger plugin
+* Added gazebo world odometry that outputs rpy
+* Contributors: Hilario Tome
+
 1.1.2 (2016-04-18)
 ------------------
 * Merge branch 'finget_plugin_pid' into 'dubnium-devel'
