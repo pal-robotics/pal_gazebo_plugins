@@ -71,8 +71,8 @@ namespace gazebo {
 
     if (_sdf->HasElement("pin_link"))
     {
-      this->pinLink_ = this->robot_ptr_->GetLink(_sdf->GetValueString("pin_link"));
-      ROS_ERROR_STREAM("Got pin_link value: " << _sdf->GetValueString("pin_link"));
+      this->pinLink_ = this->robot_ptr_->GetLink(_sdf->Get<std::string>("pin_link"));
+      ROS_ERROR_STREAM("Got pin_link value: " << _sdf->Get<std::string>("pin_link"));
     }
     else
     {

@@ -156,19 +156,19 @@ namespace gazebo {
     if( actuator_angle > lower_limit)
     {
       math::Angle index_1_angle = ( actuator_angle/2.5 > joints[1]->GetUpperLimit(0u) ) ? joints[1]->GetUpperLimit(0u) : actuator_angle/2.5;
-      joints[1]->SetAngle(0u, index_1_angle);
+      joints[1]->SetPosition(0u, index_1_angle.Radian());
 
       math::Angle index_2_angle = ( actuator_angle/3.2 > joints[2]->GetUpperLimit(0u) ) ? joints[2]->GetUpperLimit(0u) : actuator_angle/3.2;
-      joints[2]->SetAngle(0u, index_2_angle);
+      joints[2]->SetPosition(0u, index_2_angle.Radian());
 
       math::Angle index_3_angle = ( actuator_angle/3.2 > joints[3]->GetUpperLimit(0u) ) ? joints[3]->GetUpperLimit(0u) : actuator_angle/3.2;
-      joints[3]->SetAngle(0u, index_3_angle);
+      joints[3]->SetPosition(0u, index_3_angle.Radian());
     }
     else
     {
-      joints[1]->SetAngle(0u, lower_limit);
-      joints[2]->SetAngle(0u, lower_limit);
-      joints[3]->SetAngle(0u, lower_limit);
+      joints[1]->SetPosition(0u, lower_limit.Radian());
+      joints[2]->SetPosition(0u, lower_limit.Radian());
+      joints[3]->SetPosition(0u, lower_limit.Radian());
     }
   }
 

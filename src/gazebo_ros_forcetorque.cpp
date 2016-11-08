@@ -113,7 +113,7 @@ void FTPlugin::Load(sensors::SensorPtr _sensor,
 //    gzerr << "left ankle joint (l_leg_lax) not found\n";
 
   // Get sensor
-  this->footContactSensor = boost::dynamic_pointer_cast<sensors::ContactSensor> (_sensor);
+  this->footContactSensor = std::dynamic_pointer_cast<sensors::ContactSensor> (_sensor);
   if (!this->footContactSensor)
     gzerr << "contact_sensor not found\n" << "\n";
 

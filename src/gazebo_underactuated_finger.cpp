@@ -180,7 +180,7 @@ namespace gazebo {
       double error = new_angle.Radian() - pos;
       const double effort = pids_.at(i)->computeCommand(error, ros::Duration(0.001));
       //virtual_joints_.at(i)->SetForce(0, effort);
-      virtual_joints_.at(i)->SetAngle(0u, new_angle);
+      virtual_joints_.at(i)->SetPosition(0u, new_angle.Radian());
     }
   }
 
