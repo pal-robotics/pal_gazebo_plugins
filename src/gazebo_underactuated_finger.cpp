@@ -132,7 +132,12 @@ namespace gazebo {
        gzthrow(error);
      }
 
-       const ros::NodeHandle pid_nh(nh, "gains/" + this->virtual_joint_names_.at(i));
+       std::string param_prefix = "";
+       if(this->robot_namespace_ != "")
+       {
+         param_prefix = this->robot_namespace_ +"/";
+       }
+       const ros::NodeHandle pid_nh(nh, param_prefix + "gains/" + this->virtual_joint_names_.at(i));
        virtual_joints_.push_back(joint);
        PidPtr pid(new control_toolbox::Pid());
        const bool has_pid = pid->init(pid_nh, true); // true == quiet
