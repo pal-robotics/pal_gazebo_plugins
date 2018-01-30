@@ -5,6 +5,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 
 find_package(catkin REQUIRED
   COMPONENTS
+    gazebo_ros
     std_msgs
     std_srvs
     tf
