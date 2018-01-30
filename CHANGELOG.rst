@@ -8,6 +8,17 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* added gazebo_ros depend
+* Merge branch 'gazebo7' into erbium-devel
+* Merge branch 'allow-params-on-namespace' into 'dubnium-devel'
+  Allow gains to be pushed onto a namespace
+  See merge request !2
+* Allow gains to be pushed onto a namespace
+* Added gazebo7 support
+* Contributors: Hilario Tome, Hillario Tome, davidfernandez
+
 1.1.4 (2016-10-14)
 ------------------
 * Added missing depend
