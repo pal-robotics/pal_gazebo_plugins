@@ -8,6 +8,14 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Merge branch 'titanium_simulation_issue' into 'erbium-devel'
+  Control in effort when PID's are set. Otherwise control in position
+  See merge request common/pal_gazebo_plugins!3
+* Control in effort when PID's are set. Otherwise control in position
+* Contributors: Adria Roig, Hilario Tome
+
 1.1.5 (2018-01-30)
 ------------------
 * added gazebo_ros depend
