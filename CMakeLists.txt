@@ -65,6 +65,9 @@ target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${catkin_L
 add_library(gazebo_world_odometry src/gazebo_world_odometry.cpp)
 target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
 
+add_library(gazebo_attachment src/gazebo_attachment.cpp)
+target_link_libraries(gazebo_attachment ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
+
 install(TARGETS
   gazebo_ros_forcetorque
   gazebo_pal_hand
@@ -72,6 +75,7 @@ install(TARGETS
   gazebo_harness
   gazebo_underactuated_finger
   gazebo_world_odometry
+  gazebo_attachment
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   )
