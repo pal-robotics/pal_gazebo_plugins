@@ -31,6 +31,7 @@ namespace gazebo
 class GazeboAttachment : public ModelPlugin
 {
 public:
+  GazeboAttachment();
   void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
   virtual void Init() override;
 
@@ -41,6 +42,7 @@ private:
   physics::LinkPtr target_link_;
   physics::LinkPtr local_link_;
   ignition::math::Pose3d pose_;
+  bool load_ok_;
 };
 }
 

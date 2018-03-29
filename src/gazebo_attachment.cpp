@@ -12,6 +12,12 @@
 
 namespace gazebo
 {
+GazeboAttachment::GazeboAttachment()
+  : load_ok_(false)
+{
+  
+}
+
 void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
   this->model_ = _parent;
@@ -20,8 +26,12 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("target_model_name"))
   {
     this->target_model_ = this->world_->GetModel(_sdf->Get<std::string>("target_model_name"));
+    if (!this->target_model_.get())
+    {
     ROS_ERROR_STREAM(
-        "Got target_model_name value: " << _sdf->Get<std::string>("target_model_name"));
+        "Got non-existing target_model_name: " << _sdf->Get<std::string>("target_model_name"));
+    return;
+    }
   }
   else
   {
@@ -32,7 +42,11 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   {
     this->target_link_ =
         this->target_model_->GetLink(_sdf->Get<std::string>("target_link_name"));
-    ROS_ERROR_STREAM("Got target_link_name value: " << _sdf->Get<std::string>("target_link_name"));
+    if (!this->target_link_.get())
+    {
+    ROS_ERROR_STREAM("Got non-existing target_link_name: " << _sdf->Get<std::string>("target_link_name"));
+    return;
+    }
   }
   else
   {
@@ -42,7 +56,12 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (_sdf->HasElement("local_link_name"))
   {
     this->local_link_ = this->model_->GetLink(_sdf->Get<std::string>("local_link_name"));
-    ROS_ERROR_STREAM("Got local_link_name value: " << _sdf->Get<std::string>("local_link_name"));
+    if (!this->local_link_.get())
+    {
+      
+      ROS_ERROR_STREAM("Got non-existing local_link_name: " << _sdf->Get<std::string>("local_link_name"));
+      return;
+    }
   }
   else
   {
@@ -59,12 +78,18 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ROS_ERROR_STREAM("Didn't find pose");
     return;
   }
+  this->load_ok_ = true;
 }
 
 
 
 void gazebo::GazeboAttachment::Init()
 {
+  if (!this->load_ok_)
+  {
+    ROS_ERROR("Not doing attachment beacuse GazeboAttachment plugin had configuration errors");
+    return;
+  }
   const auto p = this->target_link_->GetWorldPose();
   ignition::math::Pose3d target_link_pose =
       ignition::math::Pose3d(p.pos.x, p.pos.y, p.pos.z, p.rot.w, p.rot.x, p.rot.y, p.rot.z);
