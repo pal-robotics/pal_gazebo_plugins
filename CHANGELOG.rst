@@ -8,6 +8,16 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Actively try to make the attachment on each world update loop
+* Merge branch 'gazebo-attachment-plugin' into 'erbium-devel'
+  Add gazebo_attachment plugin
+  See merge request common/pal_gazebo_plugins!4
+* Improve error checking of gazebo_attachment
+* Add gazebo_attachment plugin
+* Contributors: Hilario Tome, Victor Lopez
+
 1.1.6 (2018-03-08)
 ------------------
 * Merge branch 'titanium_simulation_issue' into 'erbium-devel'
