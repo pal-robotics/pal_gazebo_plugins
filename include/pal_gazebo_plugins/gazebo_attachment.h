@@ -10,6 +10,7 @@
 
 // Gazebo
 #include <gazebo/common/common.hh>
+#include <gazebo/common/Event.hh>
 #include <gazebo/physics/physics.hh>
 
 namespace gazebo
@@ -31,18 +32,21 @@ namespace gazebo
 class GazeboAttachment : public ModelPlugin
 {
 public:
-  GazeboAttachment();
   void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
-  virtual void Init() override;
+  virtual void createJoint();
 
+  virtual void OnUpdate(const common::UpdateInfo &);
 private:
   physics::WorldPtr world_;
   physics::ModelPtr model_;
+  std::string target_link_name_;
+  std::string target_model_name_;
+  std::string local_link_name_;
   physics::ModelPtr target_model_;
   physics::LinkPtr target_link_;
   physics::LinkPtr local_link_;
   ignition::math::Pose3d pose_;
-  bool load_ok_;
+  gazebo::event::ConnectionPtr connection_;
 };
 }
 

@@ -12,26 +12,16 @@
 
 namespace gazebo
 {
-GazeboAttachment::GazeboAttachment()
-  : load_ok_(false)
-{
-  
-}
-
 void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 {
   this->model_ = _parent;
   this->world_ = _parent->GetWorld();
+  this->connection_ = event::Events::ConnectWorldUpdateBegin(
+      std::bind(&GazeboAttachment::OnUpdate, this, std::placeholders::_1));
 
   if (_sdf->HasElement("target_model_name"))
   {
-    this->target_model_ = this->world_->GetModel(_sdf->Get<std::string>("target_model_name"));
-    if (!this->target_model_.get())
-    {
-    ROS_ERROR_STREAM(
-        "Got non-existing target_model_name: " << _sdf->Get<std::string>("target_model_name"));
-    return;
-    }
+    this->target_model_name_ = _sdf->Get<std::string>("target_model_name");
   }
   else
   {
@@ -40,13 +30,7 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
   if (_sdf->HasElement("target_link_name"))
   {
-    this->target_link_ =
-        this->target_model_->GetLink(_sdf->Get<std::string>("target_link_name"));
-    if (!this->target_link_.get())
-    {
-    ROS_ERROR_STREAM("Got non-existing target_link_name: " << _sdf->Get<std::string>("target_link_name"));
-    return;
-    }
+    this->target_link_name_ = _sdf->Get<std::string>("target_link_name");
   }
   else
   {
@@ -55,13 +39,7 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   }
   if (_sdf->HasElement("local_link_name"))
   {
-    this->local_link_ = this->model_->GetLink(_sdf->Get<std::string>("local_link_name"));
-    if (!this->local_link_.get())
-    {
-      
-      ROS_ERROR_STREAM("Got non-existing local_link_name: " << _sdf->Get<std::string>("local_link_name"));
-      return;
-    }
+    this->local_link_name_ = _sdf->Get<std::string>("local_link_name");
   }
   else
   {
@@ -78,18 +56,12 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     ROS_ERROR_STREAM("Didn't find pose");
     return;
   }
-  this->load_ok_ = true;
 }
 
 
 
-void gazebo::GazeboAttachment::Init()
+void gazebo::GazeboAttachment::createJoint()
 {
-  if (!this->load_ok_)
-  {
-    ROS_ERROR("Not doing attachment beacuse GazeboAttachment plugin had configuration errors");
-    return;
-  }
   const auto p = this->target_link_->GetWorldPose();
   ignition::math::Pose3d target_link_pose =
       ignition::math::Pose3d(p.pos.x, p.pos.y, p.pos.z, p.rot.w, p.rot.x, p.rot.y, p.rot.z);
@@ -107,6 +79,39 @@ void gazebo::GazeboAttachment::Init()
   joint->SetHighStop(0, 0);
   joint->SetLowStop(0, 0);
   joint->Init();
+}
+
+void GazeboAttachment::OnUpdate(const common::UpdateInfo &)
+{
+  ROS_INFO_STREAM_THROTTLE(5.0, "Attempting to attach " << this->target_model_name_
+                                                        << "::" << this->target_link_name_
+                                                        << " to " << this->local_link_name_);
+  this->target_model_ = this->world_->GetModel(this->target_model_name_);
+  if (!this->target_model_.get())
+  {
+    ROS_ERROR_STREAM_DELAYED_THROTTLE(5.0, "gazebo_attachment plugin got non-existing target_model_name: "
+                                               << this->target_model_name_);
+    return;
+  }
+
+  this->target_link_ = this->target_model_->GetLink(this->target_link_name_);
+  if (!this->target_link_.get())
+  {
+    ROS_ERROR_STREAM_DELAYED_THROTTLE(5.0, "gazebo_attachment plugin got non-existing target_link_name: "
+                                               << this->target_link_name_);
+    return;
+  }
+
+  this->local_link_ = this->model_->GetLink(this->local_link_name_);
+  if (!this->local_link_.get())
+  {
+    ROS_ERROR_STREAM_DELAYED_THROTTLE(5.0, "gazebo_attachment plugin got non-existing local_link_name: "
+                                               << this->local_link_name_);
+    return;
+  }
+
+  createJoint();
+  event::Events::DisconnectWorldUpdateBegin(this->connection_);
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboAttachment)
