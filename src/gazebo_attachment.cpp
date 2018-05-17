@@ -66,9 +66,9 @@ void gazebo::GazeboAttachment::createJoint()
   ignition::math::Pose3d target_link_pose =
       ignition::math::Pose3d(p.pos.x, p.pos.y, p.pos.z, p.rot.w, p.rot.x, p.rot.y, p.rot.z);
 
-  ignition::math::Pose3d target_pose =
-      ignition::math::Pose3d(target_link_pose.Pos() + this->pose_.Pos(),
-                             target_link_pose.Rot() * this->pose_.Rot());
+  ignition::math::Pose3d target_pose = ignition::math::Pose3d(
+      target_link_pose.Pos() + target_link_pose.Rot().RotateVector(this->pose_.Pos()),
+      target_link_pose.Rot() * this->pose_.Rot());
   this->model_->SetLinkWorldPose(target_pose, this->local_link_);
 
   physics::JointPtr joint =
