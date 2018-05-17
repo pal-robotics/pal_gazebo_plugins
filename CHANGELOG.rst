@@ -8,6 +8,11 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Rotate object position using target link pose
+* Contributors: Victor Lopez
+
 1.1.7 (2018-03-29)
 ------------------
 * Actively try to make the attachment on each world update loop
