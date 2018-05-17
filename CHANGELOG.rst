@@ -8,8 +8,8 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+1.1.8 (2018-05-17)
+------------------
 * Rotate object position using target link pose
 * Contributors: Victor Lopez
 
