@@ -50,6 +50,7 @@
 // Gazebo
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
+#include <ignition/math.hh>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <std_msgs/String.h>
@@ -103,8 +104,8 @@ namespace gazebo {
                                       physics::LinkPtr _link1,
                                       physics::LinkPtr _link2,
                                       std::string _type,
-                                      math::Vector3 _anchor,
-                                      math::Vector3 _axis,
+                                      ignition::math::Vector3<double> _anchor,
+                                      ignition::math::Vector3<double> _axis,
                                       double _upper, double _lower);
     /// \brief Remove a joint.
     /// \param[in] _joint Joint to remove.
