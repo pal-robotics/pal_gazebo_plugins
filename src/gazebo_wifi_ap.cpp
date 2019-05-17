@@ -36,7 +36,7 @@
 
 #include <assert.h>
 #include <pal_gazebo_plugins/gazebo_wifi_ap.h>
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 #include <pal_multirobot_msgs/WifiServiceDetection.h>
@@ -48,7 +48,7 @@ namespace gazebo {
   // Destructor
   GazeboWifiAP::~GazeboWifiAP()
   {
-    event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+    this->update_connection_.reset();
     this->rosNode_->shutdown();
     this->rosQueue_.clear();
     this->rosQueue_.disable();
@@ -191,8 +191,8 @@ namespace gazebo {
         ///
         /// Publish wifi msg
 
-        math::Pose diff_pose  = (robot_ptr_->GetWorldPose() - parent_->GetWorldPose());
-        double ray_dist = sqrt(diff_pose.pos.GetSquaredLength());
+        ignition::math::Pose3d diff_pose  = (robot_ptr_->WorldPose() - parent_->WorldPose());
+        double ray_dist = sqrt(diff_pose.Pos().SquaredLength());
         ROS_ERROR_STREAM("ray dist  " << ray_dist );
 
 
@@ -206,7 +206,7 @@ namespace gazebo {
       }
       else
       {
-        robot_ptr_ = this->world_->GetModel(this->robot_model_name_);
+        robot_ptr_ = this->world_->ModelByName(this->robot_model_name_);
         ROS_ERROR("Robot model not yet available, waiting ...");
 
       }

@@ -44,7 +44,7 @@
 
 #include <assert.h>
 #include <pal_gazebo_plugins/gazebo_harness.h>
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 
@@ -55,7 +55,7 @@ namespace gazebo {
   // Destructor
   GazeboHarness::~GazeboHarness()
   {
-//    event::Events::DisconnectWorldUpdateBegin(this->update_connection_);
+//    this->update_connection_.reset();
     this->rosNode_->shutdown();
     this->rosQueue_.clear();
     this->rosQueue_.disable();
@@ -163,12 +163,12 @@ namespace gazebo {
       // pinning robot, and turning on effect of gravity
       if (!this->pinJoint_)
       {
-        math::Pose robot_pose = this->pinLink_->GetWorldPose();
-        robot_pose.pos.z += 0.2;
+        ignition::math::Pose3d robot_pose = this->pinLink_->WorldPose();
+        robot_pose.Pos().Z() += 0.2;
         this->robot_ptr_->SetLinkWorldPose(robot_pose, this->pinLink_);
         this->pinJoint_ = this->AddJoint(this->world_, this->robot_ptr_,
                                          physics::LinkPtr(),    this->pinLink_,
-                                         "revolute", math::Vector3(0.0, 0.0, 0.0), math::Vector3(0, 0, 1), 0.0, 0.0);
+                                         "revolute", ignition::math::Vector3d(0.0, 0.0, 0.0), ignition::math::Vector3d(0, 0, 1), 0.0, 0.0);
       }
       ROS_ERROR_STREAM("Setting gravity on");
       physics::Link_V links = this->robot_ptr_->GetLinks();
@@ -207,20 +207,20 @@ namespace gazebo {
                                             physics::LinkPtr _link1,
                                             physics::LinkPtr _link2,
                                             std::string _type,
-                                            math::Vector3 _anchor,
-                                            math::Vector3 _axis,
+                                            ignition::math::Vector3d _anchor,
+                                            ignition::math::Vector3d _axis,
                                             double _upper, double _lower)
   {
-    physics::JointPtr joint = _world->GetPhysicsEngine()->CreateJoint(
+    physics::JointPtr joint = _world->Physics()->CreateJoint(
           _type, _model);
     joint->Attach(_link1, _link2);
     // load adds the joint to a vector of shared pointers kept
     // in parent and child links, preventing joint from being destroyed.
-    joint->Load(_link1, _link2, math::Pose(_anchor, math::Quaternion()));
+    joint->Load(_link1, _link2, ignition::math::Pose3d(_anchor, ignition::math::Quaterniond()));
     // joint->SetAnchor(0, _anchor);
     joint->SetAxis(0, _axis);
-    joint->SetHighStop(0, _upper);
-    joint->SetLowStop(0, _lower);
+    joint->SetUpperLimit(0, _upper);
+    joint->SetLowerLimit(0, _lower);
     if (_link1)
       joint->SetName(_link1->GetName() + std::string("_") +
                      _link2->GetName() + std::string("_joint"));

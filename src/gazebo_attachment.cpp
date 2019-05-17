@@ -6,7 +6,7 @@
   @copyright (c) 2018 PAL Robotics SL. All Rights Reserved
 */
 #include <pal_gazebo_plugins/gazebo_attachment.h>
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 
@@ -62,9 +62,9 @@ void GazeboAttachment::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
 void gazebo::GazeboAttachment::createJoint()
 {
-  const auto p = this->target_link_->GetWorldPose();
+  const auto p = this->target_link_->WorldPose();
   ignition::math::Pose3d target_link_pose =
-      ignition::math::Pose3d(p.pos.x, p.pos.y, p.pos.z, p.rot.w, p.rot.x, p.rot.y, p.rot.z);
+      ignition::math::Pose3d(p.Pos().X(), p.Pos().Y(), p.Pos().Z(), p.Rot().W(), p.Rot().X(), p.Rot().Y(), p.Rot().Z());
 
   ignition::math::Pose3d target_pose = ignition::math::Pose3d(
       target_link_pose.Pos() + target_link_pose.Rot().RotateVector(this->pose_.Pos()),
@@ -72,12 +72,12 @@ void gazebo::GazeboAttachment::createJoint()
   this->model_->SetLinkWorldPose(target_pose, this->local_link_);
 
   physics::JointPtr joint =
-      this->world_->GetPhysicsEngine()->CreateJoint("revolute", this->model_);
+      this->world_->Physics()->CreateJoint("revolute", this->model_);
   joint->Attach(this->local_link_, this->target_link_);
-  joint->Load(this->local_link_, this->target_link_, math::Pose());
+  joint->Load(this->local_link_, this->target_link_, ignition::math::Pose3d());
   joint->SetModel(this->model_);
-  joint->SetHighStop(0, 0);
-  joint->SetLowStop(0, 0);
+  joint->SetUpperLimit(0, 0);
+  joint->SetLowerLimit(0, 0);
   joint->Init();
 }
 
@@ -86,7 +86,7 @@ void GazeboAttachment::OnUpdate(const common::UpdateInfo &)
   ROS_INFO_STREAM_THROTTLE(5.0, "Attempting to attach " << this->target_model_name_
                                                         << "::" << this->target_link_name_
                                                         << " to " << this->local_link_name_);
-  this->target_model_ = this->world_->GetModel(this->target_model_name_);
+  this->target_model_ = this->world_->ModelByName(this->target_model_name_);
   if (!this->target_model_.get())
   {
     ROS_ERROR_STREAM_DELAYED_THROTTLE(5.0, "gazebo_attachment plugin got non-existing target_model_name: "
@@ -111,7 +111,7 @@ void GazeboAttachment::OnUpdate(const common::UpdateInfo &)
   }
 
   createJoint();
-  event::Events::DisconnectWorldUpdateBegin(this->connection_);
+  this->connection_.reset();
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboAttachment)

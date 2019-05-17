@@ -104,8 +104,8 @@ namespace gazebo {
                                       physics::LinkPtr _link1,
                                       physics::LinkPtr _link2,
                                       std::string _type,
-                                      math::Vector3 _anchor,
-                                      math::Vector3 _axis,
+                                      ignition::math::Vector3d _anchor,
+                                      ignition::math::Vector3d _axis,
                                       double _upper, double _lower);
     /// \brief Remove a joint.
     /// \param[in] _joint Joint to remove.

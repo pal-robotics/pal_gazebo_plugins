@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <pal_gazebo_plugins/gazebo_world_odometry.h>
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 #include <ros/ros.h>
 #include <cmath>
@@ -48,7 +48,7 @@ namespace gazebo {
     std::string link_name_ = frame_name_;
     // assert that the body by link_name_ exists
     this->link = boost::dynamic_pointer_cast<gazebo::physics::Link>(
-      this->world_->GetEntity(link_name_));
+      this->world_->EntityByName(link_name_));
     if (!this->link)
     {
       ROS_FATAL("gazebo_ros_world_ogometry plugin error: bodyName: %s does not exist\n",
@@ -99,38 +99,38 @@ namespace gazebo {
 
     boost::mutex::scoped_lock sclock(this->mutex_);
 
-    gazebo::math::Pose pose;
-    gazebo::math::Quaternion orientation;
-    gazebo::math::Vector3 position;
+    ignition::math::Pose3d pose;
+    ignition::math::Quaterniond orientation;
+    ignition::math::Vector3d position;
 
-    pose = this->link->GetWorldPose();
-    position = pose.pos;
-    orientation = pose.rot;
+    pose = this->link->WorldPose();
+    position = pose.Pos();
+    orientation = pose.Rot();
 
-//    gazebo::math::Vector3 linearVel = this->link->GetWorldLinearVel();
-//    gazebo::math::Vector3 angularVel = this->link->GetWorldAngularVel();
+//    ignition::math::Vector3d linearVel = this->link->WorldLinearVel();
+//    ignition::math::Vector3d angularVel = this->link->WorldAngularVel();
 
-    gazebo::math::Vector3 linearVel = this->link->GetWorldLinearVel();
-    gazebo::math::Vector3 angularVel = this->link->GetRelativeAngularVel();
+    ignition::math::Vector3d linearVel = this->link->WorldLinearVel();
+    ignition::math::Vector3d angularVel = this->link->RelativeAngularVel();
 
     nav_msgs::Odometry odomMsg;
 
-    odomMsg.pose.pose.position.x = position.x;
-    odomMsg.pose.pose.position.y = position.y;
-    odomMsg.pose.pose.position.z = position.z;
+    odomMsg.pose.pose.position.x = position.X();
+    odomMsg.pose.pose.position.y = position.Y();
+    odomMsg.pose.pose.position.z = position.Z();
 
-    odomMsg.pose.pose.orientation.x = orientation.x;
-    odomMsg.pose.pose.orientation.y = orientation.y;
-    odomMsg.pose.pose.orientation.z = orientation.z;
-    odomMsg.pose.pose.orientation.w = orientation.w;
+    odomMsg.pose.pose.orientation.x = orientation.X();
+    odomMsg.pose.pose.orientation.y = orientation.Y();
+    odomMsg.pose.pose.orientation.z = orientation.Z();
+    odomMsg.pose.pose.orientation.w = orientation.W();
 
-    odomMsg.twist.twist.linear.x = linearVel.x;
-    odomMsg.twist.twist.linear.y = linearVel.y;
-    odomMsg.twist.twist.linear.z = linearVel.z;
+    odomMsg.twist.twist.linear.x = linearVel.X();
+    odomMsg.twist.twist.linear.y = linearVel.Y();
+    odomMsg.twist.twist.linear.z = linearVel.Z();
 
-    odomMsg.twist.twist.angular.x = angularVel.x;
-    odomMsg.twist.twist.angular.y = angularVel.y;
-    odomMsg.twist.twist.angular.z = angularVel.z;
+    odomMsg.twist.twist.angular.x = angularVel.X();
+    odomMsg.twist.twist.angular.y = angularVel.Y();
+    odomMsg.twist.twist.angular.z = angularVel.Z();
 
     odomMsg.header.frame_id = frame_name_;
 

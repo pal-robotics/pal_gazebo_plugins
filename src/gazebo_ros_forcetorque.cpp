@@ -54,7 +54,7 @@ FTPlugin::FTPlugin() : SensorPlugin()
 ////////////////////////////////////////////////////////////////////////////////
 FTPlugin::~FTPlugin()
 {
-  event::Events::DisconnectWorldUpdateBegin(this->updateConnection);
+  this->updateConnection.reset();
   this->rosNode->shutdown();
   this->rosQueue.clear();
   this->rosQueue.disable();
@@ -170,26 +170,26 @@ void FTPlugin::UpdateChild()
     if ( ( now - this->lastUpdateTime) >= update_period)
     {
 
-        double rate = footContactSensor->GetUpdateRate();
+        double rate = footContactSensor->UpdateRate();
         //ROS_DEBUG("sensor update rate %f, dT elapsed %f [sec]", rate, ( now - this->lastUpdateTime).toSec() ); // TODO: Remove?
 
         this->lastUpdateTime = now;
 
         // Get all the contacts.
         msgs::Contacts contacts;
-        contacts = this->footContactSensor->GetContacts();
+        contacts = this->footContactSensor->Contacts();
 
         for (int i = 0; i < contacts.contact_size(); ++i)
         {
-            math::Vector3 fTotal;
-            math::Vector3 tTotal;
+            ignition::math::Vector3d fTotal;
+            ignition::math::Vector3d tTotal;
             for (int j = 0; j < contacts.contact(i).position_size(); ++j)
             {
-                fTotal += math::Vector3(
+                fTotal += ignition::math::Vector3d(
                             contacts.contact(i).wrench(j).body_1_wrench().force().x(),
                             contacts.contact(i).wrench(j).body_1_wrench().force().y(),
                             contacts.contact(i).wrench(j).body_1_wrench().force().z());
-                tTotal += math::Vector3(
+                tTotal += ignition::math::Vector3d(
                             contacts.contact(i).wrench(j).body_1_wrench().torque().x(),
                             contacts.contact(i).wrench(j).body_1_wrench().torque().y(),
                             contacts.contact(i).wrench(j).body_1_wrench().torque().z());
@@ -200,12 +200,12 @@ void FTPlugin::UpdateChild()
             this->footTorque = this->footTorque * e + tTotal * (1.0 - e);
 
             geometry_msgs::Wrench msg;
-            msg.force.x = this->footForce.x;
-            msg.force.y = this->footForce.y;
-            msg.force.z = this->footForce.z;
-            msg.torque.x = this->footTorque.x;
-            msg.torque.y = this->footTorque.y;
-            msg.torque.z = this->footTorque.z;
+            msg.force.x = this->footForce.X();
+            msg.force.y = this->footForce.Y();
+            msg.force.z = this->footForce.Z();
+            msg.torque.x = this->footTorque.X();
+            msg.torque.y = this->footTorque.Y();
+            msg.torque.z = this->footTorque.Z();
             this->pubFootContact.publish(msg);
         }
     }

@@ -40,7 +40,7 @@
 
 #include <pal_gazebo_plugins/gazebo_pal_hand.h>
 
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -151,17 +151,17 @@ namespace gazebo {
   // Update the controller
   void GazeboPalHand::UpdateChild() {
 
-    math::Angle actuator_angle = joints[0]->GetAngle(0u);
-    math::Angle lower_limit    = math::Angle(0.02);
+    ignition::math::Angle actuator_angle = joints[0]->Position(0u);
+    ignition::math::Angle lower_limit    = ignition::math::Angle(0.02);
     if( actuator_angle > lower_limit)
     {
-      math::Angle index_1_angle = ( actuator_angle/2.5 > joints[1]->GetUpperLimit(0u) ) ? joints[1]->GetUpperLimit(0u) : actuator_angle/2.5;
+      ignition::math::Angle index_1_angle = ( actuator_angle/2.5 > joints[1]->UpperLimit(0u) ) ? joints[1]->UpperLimit(0u) : actuator_angle/2.5;
       joints[1]->SetPosition(0u, index_1_angle.Radian());
 
-      math::Angle index_2_angle = ( actuator_angle/3.2 > joints[2]->GetUpperLimit(0u) ) ? joints[2]->GetUpperLimit(0u) : actuator_angle/3.2;
+      ignition::math::Angle index_2_angle = ( actuator_angle/3.2 > joints[2]->UpperLimit(0u) ) ? joints[2]->UpperLimit(0u) : actuator_angle/3.2;
       joints[2]->SetPosition(0u, index_2_angle.Radian());
 
-      math::Angle index_3_angle = ( actuator_angle/3.2 > joints[3]->GetUpperLimit(0u) ) ? joints[3]->GetUpperLimit(0u) : actuator_angle/3.2;
+      ignition::math::Angle index_3_angle = ( actuator_angle/3.2 > joints[3]->UpperLimit(0u) ) ? joints[3]->UpperLimit(0u) : actuator_angle/3.2;
       joints[3]->SetPosition(0u, index_3_angle.Radian());
     }
     else

@@ -55,7 +55,7 @@
 
 #include <boost/thread.hpp>
 
-#include <gazebo/math/Vector3.hh>
+#include <ignition/math/Vector3.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/physics/PhysicsTypes.hh>
 #include <gazebo/transport/TransportTypes.hh>
@@ -115,8 +115,8 @@ namespace gazebo
     private: ros::CallbackQueue rosQueue;
     private: boost::thread callbackQueeuThread;
 
-    private: math::Vector3 footForce;
-    private: math::Vector3 footTorque;
+    private: ignition::math::Vector3d footForce;
+    private: ignition::math::Vector3d footTorque;
 
     // Controls stuff
     private: ros::Time lastUpdateTime;
