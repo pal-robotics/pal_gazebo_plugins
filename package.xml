@@ -1,6 +1,6 @@
 <package>
   <name>pal_gazebo_plugins</name>
-  <version>1.1.8</version>
+  <version>1.1.9</version>
   <description>
     Robot-independent Gazebo plugins used by PAL Robotics.
   </description>
