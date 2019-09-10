@@ -8,8 +8,8 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+2.0.0 (2019-09-10)
+------------------
 * Fixed shadowed variables
 * added gazebo 9 API changes
 * Contributors: Jordan Palacios, Sai Kishor Kothakota
