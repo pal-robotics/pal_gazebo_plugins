@@ -18,10 +18,13 @@ find_package(catkin REQUIRED
 find_package(gazebo REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
 
-include_directories(include ${catkin_INCLUDE_DIRS}
-                            ${GAZEBO_INCLUDE_DIRS}
-                            ${Boost_INCLUDE_DIRS}
-                            ${SDFormat_INCLUDE_DIRS})
+include_directories(include)
+include_directories(
+  SYSTEM
+    ${catkin_INCLUDE_DIRS}
+    ${GAZEBO_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    ${SDFormat_INCLUDE_DIRS})
 
 
 # Remove wrongly placed link flag in GAZEBO_LIBRARIES

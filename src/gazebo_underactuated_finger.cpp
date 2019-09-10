@@ -122,9 +122,9 @@ namespace gazebo {
    ros::NodeHandle nh;
    for(unsigned int i=0 ; i<virtual_joint_names_.size(); ++i)
    {
-     gazebo::physics::JointPtr joint = this->parent->GetJoint(virtual_joint_names_.at(i));
+     gazebo::physics::JointPtr joint_ptr = this->parent->GetJoint(virtual_joint_names_.at(i));
 
-     if (!joint) {
+     if (!joint_ptr) {
        char error[200];
        snprintf(error, 200,
                 "GazeboPalHey5 Plugin (ns = %s) couldn't get actuated finger hinge joint named \"%s\"",
@@ -138,7 +138,7 @@ namespace gazebo {
          param_prefix = this->robot_namespace_ +"/";
        }
 
-       virtual_joints_.push_back(joint);
+       virtual_joints_.push_back(joint_ptr);
 
        const ros::NodeHandle pid_nh(nh, param_prefix + "gains/" + this->virtual_joint_names_.at(i));
        PidPtr pid(new control_toolbox::Pid());
