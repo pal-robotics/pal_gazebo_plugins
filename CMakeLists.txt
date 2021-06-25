@@ -11,6 +11,7 @@ find_package(catkin REQUIRED
     tf
     pal_multirobot_msgs
     roscpp
+    ddynamic_reconfigure
     control_toolbox
     nav_msgs)
 

@@ -14,7 +14,9 @@ namespace gazebo {
     res[2] = atan2( r11, r12 );
   }
 
-  GazeboWorldOdometry::GazeboWorldOdometry(){}
+  GazeboWorldOdometry::GazeboWorldOdometry()
+    : x_offset_(0.0), y_offset_(0.0), yaw_offset_(0.0), gaussian_noise_(0.0), noise_x_(0.0), noise_y_(0.0), noise_yaw_(0.0)
+  {}
 
   // Destructor
   GazeboWorldOdometry::~GazeboWorldOdometry(){
@@ -44,8 +46,16 @@ namespace gazebo {
     else
       this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
 
+    if (!_sdf->HasElement("bodyName"))
+    {
+      ROS_INFO("world odometry sensor plugin missing <bodyName>, defaults to frameName");
+      this->body_name_ = this->frame_name_;
+    }
+    else
+      this->body_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
+
     this->world_ = parent_model->GetWorld();
-    std::string link_name_ = frame_name_;
+    std::string link_name_ = body_name_;
     // assert that the body by link_name_ exists
     this->link = boost::dynamic_pointer_cast<gazebo::physics::Link>(
       this->world_->EntityByName(link_name_));
@@ -62,6 +72,12 @@ namespace gazebo {
     }
     else
       this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
+    ddr_.reset(new ddynamic_reconfigure::DDynamicReconfigure(ros::NodeHandle("gazebo/" + robot_namespace_ + "world_odometry")));
+    ddr_->registerVariable("x_offset", &x_offset_, "", -100., 100.);
+    ddr_->registerVariable("y_offset", &y_offset_, "", -100., 100.);
+    ddr_->registerVariable("yaw_offset", &yaw_offset_, "", -M_PI, M_PI);
+    ddr_->registerVariable("gaussian_noise_offset", &gaussian_noise_, "", 0., 5.);
+    ddr_->publishServicesTopics();
 
     // ros callback queue for processing subscription
     this->deferredLoadThread = boost::thread(
@@ -97,6 +113,21 @@ namespace gazebo {
     if (this->floatingBasePub_.getNumSubscribers() <= 0)
       return;
 
+
+    common::Time cur_time = this->world_->SimTime();
+
+    if (cur_time < last_time_)
+    {
+        ROS_WARN_NAMED("p3d", "Negative update time difference detected.");
+        last_time_ = cur_time;
+    }
+
+    // rate control
+    if (this->update_rate_ > 0 &&
+        (cur_time-last_time_).Double() < (1.0/this->update_rate_))
+      return;
+
+
     boost::mutex::scoped_lock sclock(this->mutex_);
 
     ignition::math::Pose3d pose;
@@ -104,8 +135,19 @@ namespace gazebo {
     ignition::math::Vector3d position;
 
     pose = this->link->WorldPose();
-    position = pose.Pos();
-    orientation = pose.Rot();
+    if (gaussian_noise_ > 0.0)
+    {
+
+      std::normal_distribution<double> distribution(0.0, gaussian_noise_);
+      noise_x_ += distribution(generator_);
+      noise_y_ += distribution(generator_);
+      noise_yaw_ += distribution(generator_);
+    }
+    ignition::math::Vector3d position_offset(noise_x_ + x_offset_, noise_y_ + y_offset_, 0.0);
+    ignition::math::Quaterniond orientation_offset(0.0, 0.0, yaw_offset_ + noise_yaw_);
+    position = position_offset + pose.Pos();
+    orientation = ignition::math::Quaterniond(pose.Rot().Roll(), pose.Rot().Pitch(), yaw_offset_ + pose.Rot().Yaw());
+
 
 //    ignition::math::Vector3d linearVel = this->link->WorldLinearVel();
 //    ignition::math::Vector3d angularVel = this->link->WorldAngularVel();
@@ -132,9 +174,14 @@ namespace gazebo {
     odomMsg.twist.twist.angular.y = angularVel.Y();
     odomMsg.twist.twist.angular.z = angularVel.Z();
 
+    odomMsg.header.stamp.sec = cur_time.sec;
+    odomMsg.header.stamp.nsec = cur_time.nsec;
     odomMsg.header.frame_id = frame_name_;
+    odomMsg.child_frame_id = body_name_;
 
     floatingBasePub_.publish(odomMsg);
+    // save last time stamp
+    last_time_ = cur_time;
   }
 
 
