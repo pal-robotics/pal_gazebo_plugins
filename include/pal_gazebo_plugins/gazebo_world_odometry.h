@@ -14,7 +14,7 @@
 #include <gazebo/physics/physics.hh>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
-
+#include <ddynamic_reconfigure/ddynamic_reconfigure.h>
 namespace gazebo {
 
   class Entity;
@@ -37,10 +37,11 @@ namespace gazebo {
     std::string robot_namespace_;
     std::string topic_name_;
     std::string frame_name_;
+    std::string body_name_;
 
     ros::NodeHandle* rosNode_;
     double      update_rate_;
-
+    common::Time last_time_;
     gazebo::physics::WorldPtr world_;
     ros::Publisher floatingBasePub_;
     gazebo::physics::LinkPtr link;
@@ -53,6 +54,16 @@ namespace gazebo {
     // Mutex
     private: boost::mutex mutex_;
 
+    std::unique_ptr<ddynamic_reconfigure::DDynamicReconfigure> ddr_;
+    double x_offset_;
+    double y_offset_;
+    double yaw_offset_;
+    double gaussian_noise_;
+
+    std::default_random_engine generator_;
+    double noise_x_;
+    double noise_y_;
+    double noise_yaw_;
   };
 
 }
