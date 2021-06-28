@@ -8,6 +8,14 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Merge branch 'expand-world-odometry' into 'ferrum-devel'
+  Add offsets to world odometry and correct odom publishing errors
+  See merge request common/pal_gazebo_plugins!7
+* Add offsets to world odometry and correct odom publishing errors
+* Contributors: Victor Lopez, victor
+
 2.0.0 (2019-09-10)
 ------------------
 * Fixed shadowed variables
