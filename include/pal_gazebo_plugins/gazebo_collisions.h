@@ -11,14 +11,14 @@
 #define GAZEBO_COLLISIONS_H
 
 #include <ros/ros.h>
-#include <gazebo_msgs/ContactsState.h>
-#include <gazebo_msgs/ContactState.h>
 
 // Gazebo
 #include <gazebo/gazebo.hh>
 #include <gazebo/common/common.hh>
 #include <gazebo/common/Event.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo_msgs/ContactsState.h>
+#include <gazebo_msgs/ContactState.h>
 
 namespace gazebo
 {
