@@ -48,7 +48,7 @@ namespace gazebo {
 
       std::vector<double> scale_factors_;
 
-      math::Angle actuator_angle_;
+      double actuator_angle_;
 
       std::string robot_namespace_;
 

@@ -41,7 +41,7 @@
 
 #include <pal_gazebo_plugins/gazebo_underactuated_finger.h>
 
-#include <gazebo/math/gzmath.hh>
+#include <ignition/math.hh>
 #include <sdf/sdf.hh>
 
 #include <ros/ros.h>
@@ -117,7 +117,7 @@ namespace gazebo {
       gzthrow(error);
     }
     actuated_joint_ = joint;
-    actuator_angle_ = actuated_joint_->GetAngle(0u);
+    actuator_angle_ = actuated_joint_->Position(0u);
 
    ros::NodeHandle nh;
    for(unsigned int i=0 ; i<virtual_joint_names_.size(); ++i)
@@ -143,7 +143,7 @@ namespace gazebo {
        const ros::NodeHandle pid_nh(nh, param_prefix + "gains/" + this->virtual_joint_names_.at(i));
        PidPtr pid(new control_toolbox::Pid());
        const bool has_pid = pid->init(pid_nh, true); // true == quiet
-       
+
        if(!has_pid){
        	ROS_ERROR_STREAM("Did not find a pid configutation in the param server for " << this->virtual_joint_names_.at(i));
         pids_.push_back(nullptr);
@@ -171,32 +171,32 @@ namespace gazebo {
   // Update the controller
   void GazeboPalHey5::UpdateChild() {
 
-    math::Angle new_actuator_angle = actuated_joint_->GetAngle(0u);
+    double new_actuator_angle = actuated_joint_->Position(0u);
 
     // Filter for noisy measure of actuated angle
-    double ang_err_rad = (actuator_angle_-new_actuator_angle).Radian();
+    double ang_err_rad = actuator_angle_ - new_actuator_angle;
     double eps_angle_rad = 0.02;
     if( fabs( ang_err_rad ) > eps_angle_rad)
       actuator_angle_ = new_actuator_angle;
 
     for(unsigned int i=0; i< virtual_joints_.size(); ++i)
     {
-      math::Angle new_angle  = actuator_angle_/scale_factors_.at(i);
+      double new_angle = actuator_angle_/scale_factors_.at(i);
 
-      if(new_angle >  virtual_joints_.at(i)->GetUpperLimit(0u))
-        new_angle = virtual_joints_.at(i)->GetUpperLimit(0u);
-      if(new_angle < virtual_joints_.at(i)->GetLowerLimit(0u))
-        new_angle = virtual_joints_.at(i)->GetLowerLimit(0u);
+      if(new_angle > virtual_joints_.at(i)->UpperLimit(0u))
+        new_angle = virtual_joints_.at(i)->UpperLimit(0u);
+      if(new_angle < virtual_joints_.at(i)->LowerLimit(0u))
+        new_angle = virtual_joints_.at(i)->LowerLimit(0u);
 
       if(pids_.at(i))
       {
-        double pos = virtual_joints_.at(i)->GetAngle(0).Radian();
-        double error = new_angle.Radian() - pos;
+        double pos = virtual_joints_.at(i)->Position(0);
+        double error = new_angle - pos;
         const double effort = pids_.at(i)->computeCommand(error, ros::Duration(0.001));
         virtual_joints_.at(i)->SetForce(0, effort);
       }
       else
-      	virtual_joints_.at(i)->SetPosition(0u, new_angle.Radian());
+        virtual_joints_.at(i)->SetPosition(0u, new_angle);
     }
   }
 
