@@ -11,12 +11,11 @@
 
 namespace gazebo
 {
-
-void
-GazeboCollisions::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
+void GazeboCollisions::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 {
   this->world_ = _world;
-  this->collisions_pub = this->n_.advertise<gazebo_msgs::ContactsState>("/gazebo_contacts", 1000);
+  this->collisions_pub =
+      this->n_.advertise<gazebo_msgs::ContactsState>("/gazebo_contacts", 1000);
   this->connection_ = event::Events::ConnectWorldUpdateBegin(
       std::bind(&GazeboCollisions::OnUpdate, this, std::placeholders::_1));
 
@@ -24,8 +23,7 @@ GazeboCollisions::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
   this->world_->Physics()->GetContactManager()->SetNeverDropContacts(true);
 }
 
-void
-GazeboCollisions::OnUpdate(const common::UpdateInfo &)
+void GazeboCollisions::OnUpdate(const common::UpdateInfo &)
 {
   int n = this->world_->Physics()->GetContactManager()->GetContactCount();
 
@@ -62,18 +60,25 @@ GazeboCollisions::OnUpdate(const common::UpdateInfo &)
       cs.contact_positions.push_back(position_vector);
     }
 
-    cs.depths.insert(cs.depths.begin(), std::begin(this->contact_->depths), std::end(this->contact_->depths));
+    cs.depths.insert(cs.depths.begin(), std::begin(this->contact_->depths),
+                     std::end(this->contact_->depths));
 
     std::stringstream info;
     info << "collision between " << cs.collision1_name << " and " << cs.collision2_name;
     cs.info = info.str();
 
-    cs.total_wrench.force.x = this->contact_->wrench->body1Force.X() + this->contact_->wrench->body2Force.X();
-    cs.total_wrench.force.y = this->contact_->wrench->body1Force.Y() + this->contact_->wrench->body2Force.Y();
-    cs.total_wrench.force.z = this->contact_->wrench->body1Force.Z() + this->contact_->wrench->body2Force.Z();
-    cs.total_wrench.torque.x = this->contact_->wrench->body1Torque.X() + this->contact_->wrench->body2Torque.X();
-    cs.total_wrench.torque.y = this->contact_->wrench->body1Torque.Y() + this->contact_->wrench->body2Torque.Y();
-    cs.total_wrench.torque.z = this->contact_->wrench->body1Torque.Z() + this->contact_->wrench->body2Torque.Z();
+    cs.total_wrench.force.x =
+        this->contact_->wrench->body1Force.X() + this->contact_->wrench->body2Force.X();
+    cs.total_wrench.force.y =
+        this->contact_->wrench->body1Force.Y() + this->contact_->wrench->body2Force.Y();
+    cs.total_wrench.force.z =
+        this->contact_->wrench->body1Force.Z() + this->contact_->wrench->body2Force.Z();
+    cs.total_wrench.torque.x =
+        this->contact_->wrench->body1Torque.X() + this->contact_->wrench->body2Torque.X();
+    cs.total_wrench.torque.y =
+        this->contact_->wrench->body1Torque.Y() + this->contact_->wrench->body2Torque.Y();
+    cs.total_wrench.torque.z =
+        this->contact_->wrench->body1Torque.Z() + this->contact_->wrench->body2Torque.Z();
 
     geometry_msgs::Wrench w1;
     w1.force.x = this->contact_->wrench->body1Force.X();
@@ -92,12 +97,12 @@ GazeboCollisions::OnUpdate(const common::UpdateInfo &)
     w2.torque.y = this->contact_->wrench->body2Torque.Y();
     w2.torque.z = this->contact_->wrench->body2Torque.Z();
     cs.wrenches.push_back(w2);
-    
+
     css.states.push_back(cs);
   }
 
   this->collisions_pub.publish(css);
- }
+}
 
-  GZ_REGISTER_WORLD_PLUGIN(GazeboCollisions)
+GZ_REGISTER_WORLD_PLUGIN(GazeboCollisions)
 }
