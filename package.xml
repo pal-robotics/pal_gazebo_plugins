@@ -14,30 +14,16 @@
 
   <author>Jose Capriles</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>ddynamic_reconfigure</build_depend>
-  <build_depend>gazebo</build_depend>
-  <build_depend>gazebo_ros</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>std_srvs</build_depend>
-  <build_depend>pal_multirobot_msgs</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>control_toolbox</build_depend>
-  <build_depend>gazebo</build_depend>
-  <build_depend>nav_msgs</build_depend>
+  <depend>gazebo</depend>
+  <depend>gazebo_ros</depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>control_toolbox</depend>
 
-  <run_depend>ddynamic_reconfigure</run_depend>
-  <run_depend>gazebo</run_depend>
-  <run_depend>gazebo_ros</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>std_srvs</run_depend>
-  <run_depend>pal_multirobot_msgs</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>control_toolbox</run_depend>
-  <run_depend>gazebo</run_depend>
-  <run_depend>nav_msgs</run_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>

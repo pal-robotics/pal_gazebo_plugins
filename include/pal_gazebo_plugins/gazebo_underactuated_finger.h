@@ -13,7 +13,8 @@
 // Gazebo
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
-#include <control_toolbox/pid.h>
+#include <control_toolbox/pid_ros.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace gazebo {
 
@@ -43,14 +44,17 @@ namespace gazebo {
       physics::JointPtr actuated_joint_;
 
       std::vector<physics::JointPtr> virtual_joints_;
-      typedef boost::shared_ptr<control_toolbox::Pid> PidPtr;
-      std::vector<PidPtr> pids_;
+      typedef boost::shared_ptr<control_toolbox::PidROS> PidROSPtr;
+      std::vector<PidROSPtr> pids_;
+      std::vector<std::map<std::string, double>> pid_gains_;
 
       std::vector<double> scale_factors_;
 
       ignition::math::Angle actuator_angle_;
 
       std::string robot_namespace_;
+
+      std::shared_ptr<rclcpp::Node> ros_node_;
 
   };
 

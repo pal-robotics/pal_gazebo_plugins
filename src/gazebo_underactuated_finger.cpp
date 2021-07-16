@@ -44,7 +44,7 @@
 #include <ignition/math.hh>
 #include <sdf/sdf.hh>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace gazebo {
 
@@ -60,15 +60,6 @@ namespace gazebo {
     this->parent = _parent;
     this->world = _parent->GetWorld();
 
-    this->robot_namespace_ = "";
-    if (!_sdf->HasElement("robotNamespace")) {
-      ROS_INFO("GazeboPalHey5 Plugin missing <robotNamespace>, defaults to \"%s\"",
-          this->robot_namespace_.c_str());
-    } else {
-      this->robot_namespace_ =
-        _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
-    }
-
     this->actuated_joint_name_ = "actuated_finger_joint";
     if (!_sdf->HasElement("actuatedJoint"))
     {
@@ -79,6 +70,22 @@ namespace gazebo {
       gzthrow(error);
     } else {
       this->actuated_joint_name_ = _sdf->GetElement("actuatedJoint")->Get<std::string>();
+    }
+
+    this->robot_namespace_ = "";
+    if (_sdf->HasElement("robotNamespace"))
+    {
+      this->robot_namespace_ =
+        _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
+
+      ros_node_ = std::make_shared<rclcpp::Node>(this->actuated_joint_name_,
+                                                 this->robot_namespace_);
+    }
+    else {
+      ros_node_ = std::make_shared<rclcpp::Node>(this->actuated_joint_name_);
+
+      RCLCPP_INFO(ros_node_->get_logger(), "GazeboPalHey5 Plugin missing <robotNamespace>, defaults to \"%s\"",
+          this->robot_namespace_.c_str());
     }
 
     if(!_sdf->HasElement("virtualJoint"))
@@ -101,6 +108,27 @@ namespace gazebo {
         double scaleFactor = virtualJointPtr->GetElement(std::string("scale_factor"))->Get<double>();
         scale_factors_.push_back(scaleFactor);
       }
+
+      if(virtualJointPtr->HasElement(std::string("pid_gains")))
+      {
+        sdf::ElementPtr pidGainsPtr = virtualJointPtr->GetElement(std::string("pid_gains"));
+        std::map<std::string,double> pidGains;
+
+        for (std::string const& gain : {"p", "i", "d", "i_max", "i_min"})
+        {
+          if (pidGainsPtr->HasElement(std::string(gain)))
+          {
+            pidGains.emplace(gain, pidGainsPtr->GetElement(std::string(gain))->Get<double>());
+          }
+        }
+
+        pid_gains_.emplace_back(pidGains);
+      }
+      else
+      {
+        pid_gains_.emplace_back();
+      }
+
       // Removing element to parse the next one, no better solution found
       virtualJointPtr->RemoveFromParent();
       if(!_sdf->HasElement("virtualJoint"))
@@ -119,40 +147,44 @@ namespace gazebo {
     actuated_joint_ = joint;
     actuator_angle_ = actuated_joint_->Position(0u);
 
-   ros::NodeHandle nh;
-   for(unsigned int i=0 ; i<virtual_joint_names_.size(); ++i)
-   {
-     gazebo::physics::JointPtr joint_ptr = this->parent->GetJoint(virtual_joint_names_.at(i));
+    for(unsigned int i=0 ; i<virtual_joint_names_.size(); ++i)
+    {
+      gazebo::physics::JointPtr joint_ptr = this->parent->GetJoint(virtual_joint_names_.at(i));
 
-     if (!joint_ptr) {
-       char error[200];
-       snprintf(error, 200,
-                "GazeboPalHey5 Plugin (ns = %s) couldn't get actuated finger hinge joint named \"%s\"",
-                this->robot_namespace_.c_str(), this->virtual_joint_names_.at(i).c_str());
-       gzthrow(error);
-     }
+      if (!joint_ptr) {
+        char error[200];
+        snprintf(error, 200,
+                 "GazeboPalHey5 Plugin (ns = %s) couldn't get actuated finger hinge joint named \"%s\"",
+                 this->robot_namespace_.c_str(), this->virtual_joint_names_.at(i).c_str());
+        gzthrow(error);
+      }
 
-       std::string param_prefix = "";
-       if(this->robot_namespace_ != "")
-       {
-         param_prefix = this->robot_namespace_ +"/";
-       }
+      virtual_joints_.push_back(joint_ptr);
 
-       virtual_joints_.push_back(joint_ptr);
+      std::shared_ptr<rclcpp::Node> node_ptr(new rclcpp::Node(this->virtual_joint_names_.at(i),
+                                                              this->robot_namespace_ + "virtual_joints/" + this->virtual_joint_names_.at(i)));
+      PidROSPtr pid(new control_toolbox::PidROS(node_ptr), node_ptr->get_name());
 
-       const ros::NodeHandle pid_nh(nh, param_prefix + "gains/" + this->virtual_joint_names_.at(i));
-       PidPtr pid(new control_toolbox::Pid());
-       const bool has_pid = pid->init(pid_nh, true); // true == quiet
-       
-       if(!has_pid){
-       	ROS_ERROR_STREAM("Did not find a pid configutation in the param server for " << this->virtual_joint_names_.at(i));
-        pids_.push_back(nullptr);
-       }
-       else
-       {
+      try
+      {
+        double p_param = pid_gains_.at(i).at("p");
+        double i_param = pid_gains_.at(i).at("i");
+        double d_param = pid_gains_.at(i).at("d");
+        double i_max_param = pid_gains_.at(i).at("i_max");
+        double i_min_param = pid_gains_.at(i).at("i_min");
+
+        pid->initPid(p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
+
         pids_.push_back(pid);
-       }
-   }
+      }
+      catch (std::out_of_range&)
+      {
+        RCLCPP_ERROR(node_ptr->get_logger(),
+                     "Did not find a complete pid configutation in the urdf for "
+                     << this->virtual_joint_names_.at(i));
+        pids_.push_back(nullptr);
+      }
+    }
     // listen to the update event (broadcast every simulation iteration)
     this->update_connection_ =
       event::Events::ConnectWorldUpdateBegin(
