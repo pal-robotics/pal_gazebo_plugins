@@ -26,7 +26,7 @@ namespace gazebo
 class GazeboCollisions : public WorldPlugin
 {
 public:
-  void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
+  virtual void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
   virtual void OnUpdate(const common::UpdateInfo &);
 
 private:
@@ -36,7 +36,7 @@ private:
   gazebo::event::ConnectionPtr connection_;
 
   ros::NodeHandle n_;
-  ros::Publisher collisions_pub;
+  ros::Publisher collisions_pub_;
 };
 
 }  // namespace

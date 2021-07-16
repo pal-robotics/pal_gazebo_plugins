@@ -14,7 +14,7 @@ namespace gazebo
 void GazeboCollisions::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 {
   this->world_ = _world;
-  this->collisions_pub =
+  this->collisions_pub_ =
       this->n_.advertise<gazebo_msgs::ContactsState>("/gazebo_contacts", 1000);
   this->connection_ = event::Events::ConnectWorldUpdateBegin(
       std::bind(&GazeboCollisions::OnUpdate, this, std::placeholders::_1));
@@ -101,7 +101,7 @@ void GazeboCollisions::OnUpdate(const common::UpdateInfo &)
     css.states.push_back(cs);
   }
 
-  this->collisions_pub.publish(css);
+  this->collisions_pub_.publish(css);
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboCollisions)
