@@ -180,8 +180,8 @@ namespace gazebo {
       catch (std::out_of_range&)
       {
         RCLCPP_ERROR(node_ptr->get_logger(),
-                     "Did not find a complete pid configutation in the urdf for "
-                     << this->virtual_joint_names_.at(i));
+                     "Did not find a complete pid configutation in the urdf for \"%s\"",
+                     this->virtual_joint_names_.at(i));
         pids_.push_back(nullptr);
       }
     }
@@ -197,7 +197,7 @@ namespace gazebo {
      init_str += this->virtual_joint_names_.at(i);
      init_str += " ";
    }
-    ROS_INFO_STREAM(init_str);
+    RCLCPP_INFO(ros_node_->get_logger(), init_str);
   }
 
   // Update the controller
@@ -224,7 +224,7 @@ namespace gazebo {
       {
         double pos = virtual_joints_.at(i)->Position(0);
         double error = new_angle.Radian() - pos;
-        const double effort = pids_.at(i)->computeCommand(error, ros::Duration(0.001));
+        const double effort = pids_.at(i)->computeCommand(error, rclcpp::Duration(0.001));
         virtual_joints_.at(i)->SetForce(0, effort);
       }
       else

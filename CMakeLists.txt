@@ -14,6 +14,7 @@ find_package(gazebo REQUIRED)
 include_directories(include)
 include_directories(
   SYSTEM
+    ${control_toolbox_INCLUDE_DIRS}
     ${GAZEBO_INCLUDE_DIRS}
     ${SDFormat_INCLUDE_DIRS})
 
