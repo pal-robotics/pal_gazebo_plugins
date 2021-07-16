@@ -44,7 +44,7 @@ namespace gazebo {
       physics::JointPtr actuated_joint_;
 
       std::vector<physics::JointPtr> virtual_joints_;
-      typedef boost::shared_ptr<control_toolbox::PidROS> PidROSPtr;
+      typedef std::shared_ptr<control_toolbox::PidROS> PidROSPtr;
       std::vector<PidROSPtr> pids_;
       std::vector<std::map<std::string, double>> pid_gains_;
 

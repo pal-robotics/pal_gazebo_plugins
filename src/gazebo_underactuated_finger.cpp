@@ -163,7 +163,7 @@ namespace gazebo {
 
       std::shared_ptr<rclcpp::Node> node_ptr(new rclcpp::Node(this->virtual_joint_names_.at(i),
                                                               this->robot_namespace_ + "virtual_joints/" + this->virtual_joint_names_.at(i)));
-      PidROSPtr pid(new control_toolbox::PidROS(node_ptr), node_ptr->get_name());
+      PidROSPtr pid(new control_toolbox::PidROS(node_ptr, node_ptr->get_name()));
 
       try
       {
