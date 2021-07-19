@@ -7,7 +7,7 @@
  * copied or disclosed except in accordance with the terms of that agreement.
  */
 
-#include <pal_gazebo_plugins/gazebo_collisions.h>
+#include <pal_gazebo_plugins/pal_gazebo_collisions.h>
 
 namespace gazebo
 {
@@ -15,7 +15,7 @@ void GazeboCollisions::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 {
   this->world_ = _world;
   this->collisions_pub_ =
-      this->n_.advertise<gazebo_msgs::ContactsState>("/gazebo_contacts", 1000);
+      this->n_.advertise<gazebo_msgs::ContactsState>("/pal_gazebo_contacts", 1000);
   this->connection_ = event::Events::ConnectWorldUpdateBegin(
       std::bind(&GazeboCollisions::OnUpdate, this, std::placeholders::_1));
 
