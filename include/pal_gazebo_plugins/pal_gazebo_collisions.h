@@ -34,6 +34,8 @@ private:
   physics::Contact *contact_;
 
   gazebo::event::ConnectionPtr connection_;
+  double update_rate_;
+  ros::Time last_time_published_;
 
   ros::NodeHandle n_;
   ros::Publisher collisions_pub_;
