@@ -25,7 +25,7 @@ string(REPLACE "-lpthread;" "" GAZEBO_LIBRARIES "${GAZEBO_LIBRARIES}")
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Plugins
-add_library(gazebo_underactuated_finger src/gazebo_underactuated_finger.cpp)
+add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
 target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES})
 
 install(TARGETS
