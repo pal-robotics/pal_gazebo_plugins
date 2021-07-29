@@ -224,11 +224,13 @@ namespace gazebo {
       {
         double pos = virtual_joints_.at(i)->Position(0);
         double error = new_angle.Radian() - pos;
-        const double effort = pids_.at(i)->computeCommand(error, rclcpp::Duration(0.001));
+        const double effort = pids_.at(i)->computeCommand(error, rclcpp::Duration(0, 1000000));
         virtual_joints_.at(i)->SetForce(0, effort);
       }
       else
+      {
       	virtual_joints_.at(i)->SetPosition(0u, new_angle.Radian());
+      }
     }
   }
 

@@ -26,7 +26,7 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Plugins
 add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
-target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES})
+target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_toolbox_LIBRARIES})
 
 install(TARGETS
   gazebo_underactuated_finger
