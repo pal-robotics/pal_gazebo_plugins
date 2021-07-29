@@ -36,7 +36,7 @@ install(TARGETS
 
 install(DIRECTORY include/
    DESTINATION include
-   FILES_MATCHING PATTERN "*.h"
+   FILES_MATCHING PATTERN "*.hpp"
 )
 
 ament_package()
