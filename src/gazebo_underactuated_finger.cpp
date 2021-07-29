@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <assert.h>
 
-#include <pal_gazebo_plugins/gazebo_underactuated_finger.h>
+#include <pal_gazebo_plugins/gazebo_underactuated_finger.hpp>
 
 #include <ignition/math.hh>
 #include <sdf/sdf.hh>
