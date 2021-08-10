@@ -8,8 +8,8 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+2.0.3 (2021-08-10)
+------------------
 * Merge branch 'fix_odometry_link' into 'ferrum-devel'
   fix odometry link
   See merge request common/pal_gazebo_plugins!13
