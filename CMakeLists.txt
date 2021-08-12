@@ -28,6 +28,9 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
 target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_toolbox_LIBRARIES})
 
+add_library(pal_gazebo_collisions src/pal_gazebo_collisions.cpp)
+target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
+
 install(TARGETS
   gazebo_underactuated_finger
   DESTINATION lib/${PROJECT_NAME}

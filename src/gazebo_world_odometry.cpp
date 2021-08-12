@@ -57,8 +57,7 @@ namespace gazebo {
     this->world_ = parent_model->GetWorld();
     std::string link_name_ = body_name_;
     // assert that the body by link_name_ exists
-    this->link = boost::dynamic_pointer_cast<gazebo::physics::Link>(
-      this->world_->EntityByName(link_name_));
+    this->link = parent_model->GetLink(link_name_);
     if (!this->link)
     {
       ROS_FATAL("gazebo_ros_world_ogometry plugin error: bodyName: %s does not exist\n",
