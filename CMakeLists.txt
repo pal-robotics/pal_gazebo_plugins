@@ -32,11 +32,19 @@ install(TARGETS
   gazebo_underactuated_finger
   DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib
-  )
+)
 
 install(DIRECTORY include/
-   DESTINATION include
-   FILES_MATCHING PATTERN "*.hpp"
+  DESTINATION include
+  FILES_MATCHING PATTERN "*.hpp"
 )
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+
+  ament_lint_auto_find_test_dependencies()
+
+  # Add your tests here
+endif()
 
 ament_package()

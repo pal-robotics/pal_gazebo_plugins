@@ -6,8 +6,8 @@
  * nondisclosure agreement with PAL Robotics SL. In this case it may not be
  * copied or disclosed except in accordance with the terms of that agreement.
  */
-#ifndef GAZEBO_PAL_HEY5_H
-#define GAZEBO_PAL_HEY5_H
+#ifndef PAL_GAZEBO_PLUGINS__GAZEBO_UNDERACTUATED_FINGER_HPP_
+#define PAL_GAZEBO_PLUGINS__GAZEBO_UNDERACTUATED_FINGER_HPP_
 
 
 // Gazebo
@@ -16,48 +16,51 @@
 #include <control_toolbox/pid_ros.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+// std C++
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 namespace gazebo {
 
-  class Joint;
-  class Entity;
+class Joint;
+class Entity;
 
-  class GazeboPalHey5 : public ModelPlugin {
+class GazeboPalHey5 : public ModelPlugin {
+public:
+  GazeboPalHey5();
+  ~GazeboPalHey5();
+  void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
 
-    public:
-      GazeboPalHey5();
-      ~GazeboPalHey5();
-      void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf);
+protected:
+  virtual void UpdateChild();
 
-    protected:
-      virtual void UpdateChild();
+private:
+  physics::WorldPtr world;
+  physics::ModelPtr parent;
+  event::ConnectionPtr update_connection_;
 
-    private:
+  std::string actuated_joint_name_;
 
-      physics::WorldPtr world;
-      physics::ModelPtr parent;
-      event::ConnectionPtr update_connection_;
+  std::vector<std::string> virtual_joint_names_;
 
-      std::string actuated_joint_name_;
+  physics::JointPtr actuated_joint_;
 
-      std::vector<std::string> virtual_joint_names_;
+  std::vector<physics::JointPtr> virtual_joints_;
+  typedef std::shared_ptr<control_toolbox::PidROS> PidROSPtr;
+  std::vector<PidROSPtr> pids_;
+  std::vector<std::map<std::string, double>> pid_gains_;
 
-      physics::JointPtr actuated_joint_;
+  std::vector<double> scale_factors_;
 
-      std::vector<physics::JointPtr> virtual_joints_;
-      typedef std::shared_ptr<control_toolbox::PidROS> PidROSPtr;
-      std::vector<PidROSPtr> pids_;
-      std::vector<std::map<std::string, double>> pid_gains_;
+  ignition::math::Angle actuator_angle_;
 
-      std::vector<double> scale_factors_;
+  std::string robot_namespace_;
 
-      ignition::math::Angle actuator_angle_;
+  std::shared_ptr<rclcpp::Node> ros_node_;
+};
 
-      std::string robot_namespace_;
+}  // namespace gazebo
 
-      std::shared_ptr<rclcpp::Node> ros_node_;
-
-  };
-
-}
-
-#endif // GAZEBO_PAL_HEY5_H
+#endif  // PAL_GAZEBO_PLUGINS__GAZEBO_UNDERACTUATED_FINGER_HPP_
