@@ -60,8 +60,8 @@ GazeboPalHey5::~GazeboPalHey5() {
 
 // Load the controller
 void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
-  this->parent = _parent;
-  this->world = _parent->GetWorld();
+  this->parent_ = _parent;
+  this->world_ = _parent->GetWorld();
 
   this->actuated_joint_name_ = "actuated_finger_joint";
   if (!_sdf->HasElement("actuatedJoint"))
@@ -137,7 +137,7 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
       break;
   }
 
-  gazebo::physics::JointPtr joint = this->parent->GetJoint(actuated_joint_name_);
+  gazebo::physics::JointPtr joint = this->parent_->GetJoint(actuated_joint_name_);
   if(!joint)
   {
     char error[200];
@@ -151,7 +151,7 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
 
   for(unsigned int i = 0 ; i < virtual_joint_names_.size(); ++i)
   {
-    gazebo::physics::JointPtr joint_ptr = this->parent->GetJoint(virtual_joint_names_.at(i));
+    gazebo::physics::JointPtr joint_ptr = this->parent_->GetJoint(virtual_joint_names_.at(i));
 
     if (!joint_ptr) {
       char error[200];

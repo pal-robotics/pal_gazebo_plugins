@@ -37,8 +37,8 @@ protected:
   virtual void UpdateChild();
 
 private:
-  physics::WorldPtr world;
-  physics::ModelPtr parent;
+  physics::WorldPtr world_;
+  physics::ModelPtr parent_;
   event::ConnectionPtr update_connection_;
 
   std::string actuated_joint_name_;
