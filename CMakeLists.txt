@@ -28,11 +28,12 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
 target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_toolbox_LIBRARIES})
 
-add_library(pal_gazebo_collisions src/pal_gazebo_collisions.cpp)
-target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES} ${catkin_LIBRARIES})
+add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
+target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
 
 install(TARGETS
   gazebo_underactuated_finger
+  pal_gazebo_collisions
   DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib
 )
@@ -44,7 +45,6 @@ install(DIRECTORY include/
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-
   ament_lint_auto_find_test_dependencies()
 
   # Add your tests here
