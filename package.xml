@@ -20,6 +20,7 @@
   <depend>gazebo_ros</depend>
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
   <depend>control_toolbox</depend>
 
   <test_depend>ament_lint_auto</test_depend>

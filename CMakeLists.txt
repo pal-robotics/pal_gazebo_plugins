@@ -31,9 +31,13 @@ target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_
 add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
 target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
 
+add_library(gazebo_world_odometry SHARED src/gazebo_world_odometry.cpp)
+target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES})
+
 install(TARGETS
   gazebo_underactuated_finger
   pal_gazebo_collisions
+  gazebo_world_odometry
   DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib
 )
