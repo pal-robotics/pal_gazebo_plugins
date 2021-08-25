@@ -39,6 +39,7 @@
 #include "gazebo/physics/physics.hh"
 #include "gazebo_msgs/msg/contacts_state.hpp"
 #include "gazebo_msgs/msg/contact_state.hpp"
+#include "gazebo_ros/node.hpp"
 
 namespace gazebo
 {
@@ -57,7 +58,7 @@ private:
   double update_rate_;
   rclcpp::Time last_time_published_;
 
-  rclcpp::Node::SharedPtr node_;
+  gazebo_ros::Node::SharedPtr node_;
   rclcpp::Publisher<gazebo_msgs::msg::ContactsState>::SharedPtr collisions_pub_;
 };
 
