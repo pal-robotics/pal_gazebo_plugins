@@ -41,7 +41,16 @@ GazeboWorldOdometry::~GazeboWorldOdometry()
 // Load the controller
 void GazeboWorldOdometry::Load(physics::ModelPtr parent_model, sdf::ElementPtr _sdf)
 {
-  RCLCPP_INFO(this->rosNode_->get_logger(), "Loading gazebo WORLD ODOMETRY RPY plugin");
+  RCLCPP_INFO(rclcpp::get_logger("Gazebo World Odometry plugin"), "Loading gazebo WORLD ODOMETRY RPY plugin");
+
+  // Make sure the ROS node for Gazebo has already been initialized
+  if (!rclcpp::ok()) {
+    RCLCPP_FATAL(
+      rclcpp::get_logger("Gazebo World Odometry plugin"),
+      "A ROS node for Gazebo has not been initialized, unable to load plugin. "
+      "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    return;
+  }
 
   this->robot_namespace_ = "";
   if (_sdf->HasElement("robotNamespace")) {
@@ -57,7 +66,7 @@ void GazeboWorldOdometry::Load(physics::ModelPtr parent_model, sdf::ElementPtr _
 
   if (!_sdf->HasElement("frameName")) {
     RCLCPP_INFO(
-      this->rosNode_->get_logger(),
+      rclcpp::get_logger("Gazebo World Odometry plugin"),
       "world odometry sensor plugin missing <frameName>, defaults to world");
     this->frame_name_ = "world";
   } else {
@@ -66,7 +75,7 @@ void GazeboWorldOdometry::Load(physics::ModelPtr parent_model, sdf::ElementPtr _
 
   if (!_sdf->HasElement("bodyName")) {
     RCLCPP_INFO(
-      this->rosNode_->get_logger(),
+      rclcpp::get_logger("Gazebo World Odometry plugin"),
       "world odometry sensor plugin missing <bodyName>, defaults to frameName");
     this->body_name_ = this->frame_name_;
   } else {
@@ -79,7 +88,7 @@ void GazeboWorldOdometry::Load(physics::ModelPtr parent_model, sdf::ElementPtr _
   this->link = parent_model->GetLink(link_name_);
   if (!this->link) {
     RCLCPP_FATAL(
-      this->rosNode_->get_logger(),
+      rclcpp::get_logger("Gazebo World Odometry plugin"),
       "gazebo_ros_world_ogometry plugin error: bodyName: %s does not exist\n",
       link_name_.c_str());
   }
@@ -87,27 +96,11 @@ void GazeboWorldOdometry::Load(physics::ModelPtr parent_model, sdf::ElementPtr _
   this->update_rate_ = 1000.0;
   if (!_sdf->HasElement("updateRate")) {
     RCLCPP_INFO(
-      this->rosNode_->get_logger(),
+      rclcpp::get_logger("Gazebo World Odometry plugin"),
       "world odometry plugin missing <updateRate>, defaults to %f", this->update_rate_);
   } else {
     this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
   }
-
-  rcl_interfaces::msg::ParameterDescriptor descriptor;
-  rcl_interfaces::msg::FloatingPointRange range;
-
-  range.set__from_value(-100.).set__to_value(100.).set__step(0.1);
-  descriptor.floating_point_range = {range};
-  this->rosNode_->declare_parameter("x_offset", x_offset_, descriptor);
-  this->rosNode_->declare_parameter("y_offset", y_offset_, descriptor);
-
-  range.set__from_value(-M_PI).set__to_value(M_PI).set__step(0.1);
-  descriptor.floating_point_range = {range};
-  this->rosNode_->declare_parameter("yaw_offset", yaw_offset_, descriptor);
-
-  range.set__from_value(0.).set__to_value(5.).set__step(0.1);
-  descriptor.floating_point_range = {range};
-  this->rosNode_->declare_parameter("gaussian_noise_offset", gaussian_noise_, descriptor);
 
   // ros callback queue for processing subscription
   this->deferredLoadThread = std::thread(
@@ -117,18 +110,28 @@ void GazeboWorldOdometry::Load(physics::ModelPtr parent_model, sdf::ElementPtr _
 ////////////////////////////////////////////////////////////////////////////////
 void GazeboWorldOdometry::DeferredLoad()
 {
-  // Make sure the ROS node for Gazebo has already been initialized
-  if (!rclcpp::ok()) {
-    RCLCPP_FATAL(
-      this->rosNode_->get_logger(),
-      "A ROS node for Gazebo has not been initialized, unable to load plugin. "
-      "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
-    return;
-  }
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("Gazebo World Odometry plugin"), "Deferred Loading " << robot_namespace_);
 
   this->rosNode_ = rclcpp::Node::make_shared(
-    this->robot_namespace_ + "_gazebo_world_odometry",
-    this->robot_namespace_);
+    this->robot_namespace_ + "gazebo_world_odometry");
+
+  rcl_interfaces::msg::ParameterDescriptor descriptor;
+  rcl_interfaces::msg::FloatingPointRange range;
+
+  range.set__from_value(-100.).set__to_value(100.);
+  descriptor.floating_point_range = {range};
+  this->rosNode_->declare_parameter("x_offset", x_offset_, descriptor);
+  this->rosNode_->declare_parameter("y_offset", y_offset_, descriptor);
+
+  range.set__from_value(-M_PI).set__to_value(M_PI);
+  descriptor.floating_point_range = {range};
+  this->rosNode_->declare_parameter("yaw_offset", yaw_offset_, descriptor);
+
+  range.set__from_value(0.).set__to_value(5.);
+  descriptor.floating_point_range = {range};
+  this->rosNode_->declare_parameter("gaussian_noise_offset", gaussian_noise_, descriptor);
+
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("Gazebo World Odometry plugin"), "create publisher: " << topic_name_);
   floatingBasePub_ = this->rosNode_->create_publisher<nav_msgs::msg::Odometry>(topic_name_, 10);
 
   // ros callback queue for processing subscription
@@ -139,6 +142,8 @@ void GazeboWorldOdometry::DeferredLoad()
   this->update_connection_ =
     event::Events::ConnectWorldUpdateBegin(
     boost::bind(&GazeboWorldOdometry::UpdateChild, this));
+
+  RCLCPP_INFO(rclcpp::get_logger("Gazebo World Odometry plugin"), "Finish Deferred Loading gazebo WORLD ODOMETRY RPY plugin");
 }
 
 // Update the controller
@@ -152,7 +157,7 @@ void GazeboWorldOdometry::UpdateChild()
   common::Time cur_time = this->world_->SimTime();
 
   if (cur_time < last_time_) {
-    RCLCPP_WARN(this->rosNode_->get_logger(), "p3d: Negative update time difference detected.");
+    RCLCPP_WARN(rclcpp::get_logger("Gazebo World Odometry plugin"), "p3d: Negative update time difference detected.");
     last_time_ = cur_time;
   }
 
