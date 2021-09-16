@@ -1,241 +1,308 @@
-/*
- * Copyright 2019 PAL Robotics SL. All Rights Reserved
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited,
- * unless it was supplied under the terms of a license agreement or
- * nondisclosure agreement with PAL Robotics SL. In this case it may not be
- * copied or disclosed except in accordance with the terms of that agreement.
- */
+// Copyright 2013 Open Source Robotics Foundation, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
+#include <ignition/math/Rand.hh>
+#include <gazebo_ros/node.hpp>
+#include <gazebo_ros/utils.hpp>
+#include <gazebo_ros/conversions/geometry_msgs.hpp>
+#include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <pal_gazebo_plugins/gazebo_world_odometry.hpp>
-#include <ignition/math.hh>
-#include <sdf/sdf.hh>
+#include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <assert.h>
-#include <cmath>
+#ifdef NO_ERROR
+// NO_ERROR is a macro defined in Windows that's used as an enum in tf2
+#undef NO_ERROR
+#endif
+
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2_ros/transform_listener.h>
+
+#ifdef IGN_PROFILER_ENABLE
+#include <ignition/common/Profiler.hh>
+#endif
 
 #include <string>
+#include <memory>
 
-namespace gazebo
+namespace gazebo_plugins
 {
 
-void threeaxisrot(double r11, double r12, double r21, double r31, double r32, double res[])
+class GazeboWorldOdometryPrivate
 {
-  res[0] = atan2(r31, r32);
-  res[1] = asin(r21);
-  res[2] = atan2(r11, r12);
-}
+public:
+  /// Callback to be called at every simulation iteration
+  /// \param[in] info Updated simulation info
+  void OnUpdate(const gazebo::common::UpdateInfo & info);
+
+  /// The link being traked.
+  gazebo::physics::LinkPtr link_{nullptr};
+
+  /// The body of the frame to display pose, twist
+  gazebo::physics::LinkPtr reference_link_{nullptr};
+
+  /// Pointer to ros node
+  gazebo_ros::Node::SharedPtr ros_node_{nullptr};
+
+  /// Odometry publisher
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_{nullptr};
+
+  /// Odom topic name
+  std::string topic_name_{"odom"};
+
+  /// Frame transform name, should match name of reference link, or be world.
+  std::string frame_name_{"world"};
+
+  /// Constant xyz and rpy offsets
+  ignition::math::Pose3d offset_;
+
+  /// Keep track of the last update time.
+  gazebo::common::Time last_time_;
+
+  /// Publish rate in Hz.
+  double update_rate_{0.0};
+
+  /// Gaussian noise
+  double gaussian_noise_;
+
+  /// Pointer to the update event connection
+  gazebo::event::ConnectionPtr update_connection_{nullptr};
+};
 
 GazeboWorldOdometry::GazeboWorldOdometry()
-: x_offset_(0.0), y_offset_(0.0), yaw_offset_(0.0), gaussian_noise_(0.0), noise_x_(0.0),
-  noise_y_(0.0), noise_yaw_(0.0)
-{}
+: impl_(std::make_unique<GazeboWorldOdometryPrivate>())
+{
+}
 
-// Destructor
 GazeboWorldOdometry::~GazeboWorldOdometry()
 {
-  rclcpp::shutdown();
 }
 
 // Load the controller
-void GazeboWorldOdometry::Load(physics::ModelPtr parent_model, sdf::ElementPtr _sdf)
+void GazeboWorldOdometry::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
-  RCLCPP_INFO(rclcpp::get_logger("Gazebo World Odometry plugin"), "Loading gazebo WORLD ODOMETRY RPY plugin");
+  // Configure the plugin from the SDF file
+  impl_->ros_node_ = gazebo_ros::Node::Get(sdf);
 
-  // Make sure the ROS node for Gazebo has already been initialized
-  if (!rclcpp::ok()) {
-    RCLCPP_FATAL(
-      rclcpp::get_logger("Gazebo World Odometry plugin"),
-      "A ROS node for Gazebo has not been initialized, unable to load plugin. "
-      "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+  // Get QoS profiles
+  const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
+  if (!sdf->HasElement("update_rate")) {
+    RCLCPP_DEBUG(
+      impl_->ros_node_->get_logger(), "p3d plugin missing <update_rate>, defaults to 0.0"
+      " (as fast as possible)");
+  } else {
+    impl_->update_rate_ = sdf->GetElement("update_rate")->Get<double>();
+  }
+
+  std::string link_name;
+  if (!sdf->HasElement("body_name")) {
+    RCLCPP_ERROR(impl_->ros_node_->get_logger(), "Missing <body_name>, cannot proceed");
+    return;
+  } else {
+    link_name = sdf->GetElement("body_name")->Get<std::string>();
+  }
+
+  impl_->link_ = model->GetLink(link_name);
+  if (!impl_->link_) {
+    RCLCPP_ERROR(
+      impl_->ros_node_->get_logger(), "body_name: %s does not exist\n",
+      link_name.c_str());
     return;
   }
 
-  this->robot_namespace_ = "";
-  if (_sdf->HasElement("robotNamespace")) {
-    this->robot_namespace_ =
-      _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
+  if (sdf->HasElement("topic_name")) {
+    impl_->topic_name_ = sdf->GetElement("topic_name")->Get<std::string>();
   }
 
-  this->topic_name_ = "ft_data";
-  if (_sdf->GetElement("topicName")) {
-    this->topic_name_ =
-      _sdf->GetElement("topicName")->Get<std::string>();
-  }
+  impl_->pub_ = impl_->ros_node_->create_publisher<nav_msgs::msg::Odometry>(
+    impl_->topic_name_, qos.get_publisher_qos(
+      impl_->topic_name_, rclcpp::SensorDataQoS().reliable()));
+  impl_->topic_name_ = impl_->pub_->get_topic_name();
+  RCLCPP_DEBUG(
+    impl_->ros_node_->get_logger(), "Publishing on topic [%s]", impl_->topic_name_.c_str());
 
-  if (!_sdf->HasElement("frameName")) {
-    RCLCPP_INFO(
-      rclcpp::get_logger("Gazebo World Odometry plugin"),
-      "world odometry sensor plugin missing <frameName>, defaults to world");
-    this->frame_name_ = "world";
+  if (sdf->HasElement("xyz_offsets")) {
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(), "<xyz_offsets> is deprecated, use <xyz_offset> instead.");
+    impl_->offset_.Pos() = sdf->GetElement("xyz_offsets")->Get<ignition::math::Vector3d>();
+  }
+  if (!sdf->HasElement("xyz_offset")) {
+    if (!sdf->HasElement("xyz_offsets")) {
+      RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <xyz_offset>, defaults to 0s");
+    }
   } else {
-    this->frame_name_ = _sdf->GetElement("frameName")->Get<std::string>();
+    impl_->offset_.Pos() = sdf->GetElement("xyz_offset")->Get<ignition::math::Vector3d>();
   }
 
-  if (!_sdf->HasElement("bodyName")) {
-    RCLCPP_INFO(
-      rclcpp::get_logger("Gazebo World Odometry plugin"),
-      "world odometry sensor plugin missing <bodyName>, defaults to frameName");
-    this->body_name_ = this->frame_name_;
+  if (sdf->HasElement("rpy_offsets")) {
+    RCLCPP_WARN(
+      impl_->ros_node_->get_logger(), "<rpy_offsets> is deprecated, use <rpy_offset> instead.");
+    impl_->offset_.Rot() = ignition::math::Quaterniond(
+      sdf->GetElement("rpy_offsets")->Get<ignition::math::Vector3d>());
+  }
+  if (!sdf->HasElement("rpy_offset")) {
+    if (!sdf->HasElement("rpy_offsets")) {
+      RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <rpy_offset>, defaults to 0s");
+    }
   } else {
-    this->body_name_ = _sdf->GetElement("bodyName")->Get<std::string>();
+    impl_->offset_.Rot() = ignition::math::Quaterniond(
+      sdf->GetElement("rpy_offset")->Get<ignition::math::Vector3d>());
   }
 
-  this->world_ = parent_model->GetWorld();
-  std::string link_name_ = body_name_;
-  // assert that the body by link_name_ exists
-  this->link = parent_model->GetLink(link_name_);
-  if (!this->link) {
-    RCLCPP_FATAL(
-      rclcpp::get_logger("Gazebo World Odometry plugin"),
-      "gazebo_ros_world_ogometry plugin error: bodyName: %s does not exist\n",
-      link_name_.c_str());
-  }
-
-  this->update_rate_ = 1000.0;
-  if (!_sdf->HasElement("updateRate")) {
-    RCLCPP_INFO(
-      rclcpp::get_logger("Gazebo World Odometry plugin"),
-      "world odometry plugin missing <updateRate>, defaults to %f", this->update_rate_);
+  if (!sdf->HasElement("gaussian_noise")) {
+    RCLCPP_DEBUG(impl_->ros_node_->get_logger(), "Missing <gassian_noise>, defaults to 0.0");
+    impl_->gaussian_noise_ = 0;
   } else {
-    this->update_rate_ = _sdf->GetElement("updateRate")->Get<double>();
+    impl_->gaussian_noise_ = sdf->GetElement("gaussian_noise")->Get<double>();
   }
 
-  // ros callback queue for processing subscription
-  this->deferredLoadThread = std::thread(
-    std::bind(&GazeboWorldOdometry::DeferredLoad, this));
-}
+  impl_->last_time_ = model->GetWorld()->SimTime();
 
-////////////////////////////////////////////////////////////////////////////////
-void GazeboWorldOdometry::DeferredLoad()
-{
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("Gazebo World Odometry plugin"), "Deferred Loading " << robot_namespace_);
+  if (!sdf->HasElement("frame_name")) {
+    RCLCPP_DEBUG(
+      impl_->ros_node_->get_logger(), "Missing <frame_name>, defaults to world");
+  } else {
+    impl_->frame_name_ = sdf->GetElement("frame_name")->Get<std::string>();
+  }
 
-  this->rosNode_ = rclcpp::Node::make_shared(
-    this->robot_namespace_ + "gazebo_world_odometry");
+  // If frame_name specified is "/world", "world", "/map" or "map" report
+  // back inertial values in the gazebo world
+  if (impl_->frame_name_ != "/world" && impl_->frame_name_ != "world" &&
+    impl_->frame_name_ != "/map" && impl_->frame_name_ != "map")
+  {
+    impl_->reference_link_ = model->GetLink(impl_->frame_name_);
+    if (!impl_->reference_link_) {
+      RCLCPP_WARN(
+        impl_->ros_node_->get_logger(), "<frame_name> [%s] does not exist.",
+        impl_->frame_name_.c_str());
+    }
+  }
 
-  rcl_interfaces::msg::ParameterDescriptor descriptor;
-  rcl_interfaces::msg::FloatingPointRange range;
-
-  range.set__from_value(-100.).set__to_value(100.);
-  descriptor.floating_point_range = {range};
-  this->rosNode_->declare_parameter("x_offset", x_offset_, descriptor);
-  this->rosNode_->declare_parameter("y_offset", y_offset_, descriptor);
-
-  range.set__from_value(-M_PI).set__to_value(M_PI);
-  descriptor.floating_point_range = {range};
-  this->rosNode_->declare_parameter("yaw_offset", yaw_offset_, descriptor);
-
-  range.set__from_value(0.).set__to_value(5.);
-  descriptor.floating_point_range = {range};
-  this->rosNode_->declare_parameter("gaussian_noise_offset", gaussian_noise_, descriptor);
-
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("Gazebo World Odometry plugin"), "create publisher: " << topic_name_);
-  floatingBasePub_ = this->rosNode_->create_publisher<nav_msgs::msg::Odometry>(topic_name_, 10);
-
-  // ros callback queue for processing subscription
-  this->callbackQueeuThread = std::thread(
-    std::bind(&GazeboWorldOdometry::RosQueueThread, this));
-
-  // listen to the update event (broadcast every simulation iteration)
-  this->update_connection_ =
-    event::Events::ConnectWorldUpdateBegin(
-    boost::bind(&GazeboWorldOdometry::UpdateChild, this));
-
-  RCLCPP_INFO(rclcpp::get_logger("Gazebo World Odometry plugin"), "Finish Deferred Loading gazebo WORLD ODOMETRY RPY plugin");
+  // Listen to the update event. This event is broadcast every simulation iteration
+  impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+    std::bind(&GazeboWorldOdometryPrivate::OnUpdate, impl_.get(), std::placeholders::_1));
 }
 
 // Update the controller
-void GazeboWorldOdometry::UpdateChild()
+void GazeboWorldOdometryPrivate::OnUpdate(const gazebo::common::UpdateInfo & info)
 {
-  if (this->floatingBasePub_->get_subscription_count() <= 0) {
+  if (!link_) {
+    return;
+  }
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE("GazeboWorldOdometryPrivate::OnUpdate");
+#endif
+  gazebo::common::Time current_time = info.simTime;
+
+  if (current_time < last_time_) {
+    RCLCPP_WARN(ros_node_->get_logger(), "Negative update time difference detected.");
+    last_time_ = current_time;
+  }
+
+  // Rate control
+  if (update_rate_ > 0 &&
+    (current_time - last_time_).Double() < (1.0 / update_rate_))
+  {
     return;
   }
 
-
-  common::Time cur_time = this->world_->SimTime();
-
-  if (cur_time < last_time_) {
-    RCLCPP_WARN(rclcpp::get_logger("Gazebo World Odometry plugin"), "p3d: Negative update time difference detected.");
-    last_time_ = cur_time;
-  }
-
-  // rate control
-  if (this->update_rate_ > 0 && (cur_time - last_time_).Double() < (1.0 / this->update_rate_)) {
+  // If we don't have any subscribers, don't bother composing and sending the message
+  if (ros_node_->count_subscribers(topic_name_) == 0) {
     return;
   }
 
-  std::scoped_lock<std::mutex> sclock(this->mutex_);
-
-  ignition::math::Pose3d pose;
-  ignition::math::Quaterniond orientation;
-  ignition::math::Vector3d position;
-
-  pose = this->link->WorldPose();
-  if (gaussian_noise_ > 0.0) {
-    std::normal_distribution<double> distribution(0.0, gaussian_noise_);
-    noise_x_ += distribution(generator_);
-    noise_y_ += distribution(generator_);
-    noise_yaw_ += distribution(generator_);
+  // Differentiate to get accelerations
+  double tmp_dt = current_time.Double() - last_time_.Double();
+  if (tmp_dt == 0) {
+    return;
   }
-  ignition::math::Vector3d position_offset(noise_x_ + x_offset_, noise_y_ + y_offset_, 0.0);
-  ignition::math::Quaterniond orientation_offset(0.0, 0.0, yaw_offset_ + noise_yaw_);
-  position = position_offset + pose.Pos();
-  orientation = ignition::math::Quaterniond(
-    pose.Rot().Roll(), pose.Rot().Pitch(), yaw_offset_ +
-    pose.Rot().Yaw());
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_BEGIN("fill ROS message");
+#endif
+  nav_msgs::msg::Odometry pose_msg;
 
+  // Copy data into pose message
+  pose_msg.header.frame_id = frame_name_;
+  pose_msg.header.stamp = gazebo_ros::Convert<builtin_interfaces::msg::Time>(current_time);
+  pose_msg.child_frame_id = link_->GetName();
 
-//    ignition::math::Vector3d linearVel = this->link->WorldLinearVel();
-//    ignition::math::Vector3d angularVel = this->link->WorldAngularVel();
+  // Get inertial rates
+  ignition::math::Vector3d vpos = link_->RelativeLinearVel();
+  ignition::math::Vector3d veul = link_->RelativeAngularVel();
 
-  ignition::math::Vector3d linearVel = this->link->WorldLinearVel();
-  ignition::math::Vector3d angularVel = this->link->RelativeAngularVel();
+  // Get pose/orientation
+  auto pose = link_->WorldPose();
 
-  nav_msgs::msg::Odometry odomMsg;
+  // Apply reference frame
+  if (reference_link_) {
+    // Convert to relative pose, rates
+    auto frame_pose = reference_link_->WorldPose();
 
-  odomMsg.pose.pose.position.x = position.X();
-  odomMsg.pose.pose.position.y = position.Y();
-  odomMsg.pose.pose.position.z = position.Z();
-
-  odomMsg.pose.pose.orientation.x = orientation.X();
-  odomMsg.pose.pose.orientation.y = orientation.Y();
-  odomMsg.pose.pose.orientation.z = orientation.Z();
-  odomMsg.pose.pose.orientation.w = orientation.W();
-
-  odomMsg.twist.twist.linear.x = linearVel.X();
-  odomMsg.twist.twist.linear.y = linearVel.Y();
-  odomMsg.twist.twist.linear.z = linearVel.Z();
-
-  odomMsg.twist.twist.angular.x = angularVel.X();
-  odomMsg.twist.twist.angular.y = angularVel.Y();
-  odomMsg.twist.twist.angular.z = angularVel.Z();
-
-  odomMsg.header.stamp.sec = cur_time.sec;
-  odomMsg.header.stamp.nanosec = cur_time.nsec;
-  odomMsg.header.frame_id = frame_name_;
-  odomMsg.child_frame_id = body_name_;
-
-  floatingBasePub_->publish(odomMsg);
-  // save last time stamp
-  last_time_ = cur_time;
-}
-
-
-void GazeboWorldOdometry::RosQueueThread()
-{
-//  static const double timeout = 0.01;
-  rclcpp::GenericRate rate(this->update_rate_);
-  rclcpp::executors::SingleThreadedExecutor executor;
-  executor.add_node(this->rosNode_);
-
-  while (rclcpp::ok()) {
-    executor.spin_once();
-    rate.sleep();
+    pose.Pos() = pose.Pos() - frame_pose.Pos();
+    pose.Pos() = frame_pose.Rot().RotateVectorReverse(pose.Pos());
+    pose.Rot() *= frame_pose.Rot().Inverse();
   }
+
+  // Apply constant offsets
+
+  // Apply XYZ offsets and get position and rotation components
+  pose.Pos() = pose.Pos() + offset_.Pos();
+  // Apply RPY offsets
+  pose.Rot() = offset_.Rot() * pose.Rot();
+  pose.Rot().Normalize();
+
+  // Fill out messages
+  pose_msg.pose.pose.position = gazebo_ros::Convert<geometry_msgs::msg::Point>(pose.Pos());
+  pose_msg.pose.pose.orientation = gazebo_ros::Convert<geometry_msgs::msg::Quaternion>(pose.Rot());
+
+  pose_msg.twist.twist.linear.x = vpos.X() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.linear.y = vpos.Y() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.linear.z = vpos.Z() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.angular.x = veul.X() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.angular.y = veul.Y() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+  pose_msg.twist.twist.angular.z = veul.Z() + ignition::math::Rand::DblNormal(0, gaussian_noise_);
+
+  // Fill in covariance matrix
+  /// @TODO: let user set separate linear and angular covariance values
+  double gn2 = gaussian_noise_ * gaussian_noise_;
+  pose_msg.pose.covariance[0] = gn2;
+  pose_msg.pose.covariance[7] = gn2;
+  pose_msg.pose.covariance[14] = gn2;
+  pose_msg.pose.covariance[21] = gn2;
+  pose_msg.pose.covariance[28] = gn2;
+  pose_msg.pose.covariance[35] = gn2;
+  pose_msg.twist.covariance[0] = gn2;
+  pose_msg.twist.covariance[7] = gn2;
+  pose_msg.twist.covariance[14] = gn2;
+  pose_msg.twist.covariance[21] = gn2;
+  pose_msg.twist.covariance[28] = gn2;
+  pose_msg.twist.covariance[35] = gn2;
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+  IGN_PROFILE_BEGIN("publish");
+#endif
+  // Publish to ROS
+  pub_->publish(pose_msg);
+#ifdef IGN_PROFILER_ENABLE
+  IGN_PROFILE_END();
+#endif
+  // Save last time stamp
+  last_time_ = current_time;
 }
 
 GZ_REGISTER_MODEL_PLUGIN(GazeboWorldOdometry)
 
-}  // namespace gazebo
+}  // namespace gazebo_plugins
