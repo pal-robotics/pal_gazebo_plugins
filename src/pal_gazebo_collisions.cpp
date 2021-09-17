@@ -54,7 +54,7 @@ void GazeboCollisions::OnUpdate(const common::UpdateInfo &)
       cs.collision2_name = this->contact_->collision2->GetScopedName();
 
       geometry_msgs::Vector3 normal_vector;
-      for (ignition::math::v4::Vector3d normal : this->contact_->normals)
+      for (ignition::math::Vector3d normal : this->contact_->normals)
       {
         normal_vector.x = normal.X();
         normal_vector.y = normal.Y();
@@ -63,7 +63,7 @@ void GazeboCollisions::OnUpdate(const common::UpdateInfo &)
       }
 
       geometry_msgs::Vector3 position_vector;
-      for (ignition::math::v4::Vector3d position : this->contact_->positions)
+      for (ignition::math::Vector3d position : this->contact_->positions)
       {
         position_vector.x = position.X();
         position_vector.y = position.Y();
