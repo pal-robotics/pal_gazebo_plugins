@@ -7,6 +7,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(control_toolbox REQUIRED)
 find_package(gazebo_ros REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
@@ -31,9 +32,13 @@ target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_
 add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
 target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
 
+add_library(gazebo_world_odometry SHARED src/gazebo_world_odometry.cpp)
+target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES} ${nav_msgs_LIBRARIES})
+
 install(TARGETS
   gazebo_underactuated_finger
   pal_gazebo_collisions
+  gazebo_world_odometry
   DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib
 )
