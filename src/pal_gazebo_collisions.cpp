@@ -30,15 +30,17 @@
 
 namespace gazebo
 {
+using std::placeholders::_1;
+
 void GazeboCollisions::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 {
   this->world_ = _world;
-  this->node_ = rclcpp::Node::make_shared("pal_gazebo_collisions_pub");
+  this->node_ = gazebo_ros::Node::Get(_sdf);
   this->last_time_published_ = node_->now();
   this->collisions_pub_ =
     this->node_->create_publisher<gazebo_msgs::msg::ContactsState>("/pal_gazebo_contacts", 1000);
   this->connection_ = event::Events::ConnectWorldUpdateBegin(
-    std::bind(&GazeboCollisions::OnUpdate, this, std::placeholders::_1));
+    std::bind(&GazeboCollisions::OnUpdate, this, _1));
 
   // Activate contacts computation
   this->world_->Physics()->GetContactManager()->SetNeverDropContacts(true);
