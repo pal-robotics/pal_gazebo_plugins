@@ -26,8 +26,10 @@ string(REPLACE "-lpthread;" "" GAZEBO_LIBRARIES "${GAZEBO_LIBRARIES}")
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Plugins
-add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
-target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_toolbox_LIBRARIES})
+
+### TODO fix gazebo_underactuated_finger plugin
+# add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
+# target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_toolbox_LIBRARIES})
 
 add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
 target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
@@ -36,7 +38,7 @@ add_library(gazebo_world_odometry SHARED src/gazebo_world_odometry.cpp)
 target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES} ${nav_msgs_LIBRARIES})
 
 install(TARGETS
-  gazebo_underactuated_finger
+  # gazebo_underactuated_finger
   pal_gazebo_collisions
   gazebo_world_odometry
   DESTINATION lib/${PROJECT_NAME}
