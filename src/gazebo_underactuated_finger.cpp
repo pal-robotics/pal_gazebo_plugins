@@ -186,7 +186,7 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
     {
       RCLCPP_ERROR(node_ptr->get_logger(),
                    "Did not find a complete pid configutation in the urdf for \"%s\"",
-                   this->virtual_joint_names_.at(i));
+                   this->virtual_joint_names_.at(i).c_str());
       pids_.push_back(nullptr);
     }
   }
@@ -203,7 +203,7 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
    init_str += this->virtual_joint_names_.at(i);
    init_str += " ";
   }
-  RCLCPP_INFO(ros_node_->get_logger(), init_str);
+  RCLCPP_INFO_STREAM(ros_node_->get_logger(), init_str);
 }
 
 // Update the controller
