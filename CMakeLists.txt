@@ -7,7 +7,9 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(control_toolbox REQUIRED)
 find_package(gazebo_ros REQUIRED)
+find_package(gazebo_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 # Depend on system install of Gazebo and SDFormat
 find_package(gazebo REQUIRED)
@@ -27,20 +29,32 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Plugins
 
-### TODO fix gazebo_underactuated_finger plugin
-# add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
-# target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES} ${control_toolbox_LIBRARIES})
+ add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
+ target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES})
+ ament_target_dependencies(gazebo_underactuated_finger
+   rclcpp
+   control_toolbox
+ )
 
-add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
-target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
+ add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
+ target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
+ ament_target_dependencies(pal_gazebo_collisions
+   rclcpp
+   gazebo_msgs
+ )
 
-add_library(gazebo_world_odometry SHARED src/gazebo_world_odometry.cpp)
-target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES} ${nav_msgs_LIBRARIES})
+ add_library(gazebo_world_odometry SHARED src/gazebo_world_odometry.cpp)
+ target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES})
+ ament_target_dependencies(gazebo_world_odometry
+   rclcpp
+   nav_msgs
+   tf2_geometry_msgs
+ )
 
 install(TARGETS
-  # gazebo_underactuated_finger
-  pal_gazebo_collisions
-  gazebo_world_odometry
+   gazebo_underactuated_finger
+   pal_gazebo_collisions
+   gazebo_world_odometry
   DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib
 )

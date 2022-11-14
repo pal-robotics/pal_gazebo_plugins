@@ -18,9 +18,11 @@
 
   <depend>gazebo</depend>
   <depend>gazebo_ros</depend>
+  <depend>gazebo_msgs</depend>
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>tf2_geometry_msgs</depend>
   <depend>control_toolbox</depend>
 
   <test_depend>ament_lint_auto</test_depend>
