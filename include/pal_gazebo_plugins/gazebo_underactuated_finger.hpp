@@ -15,6 +15,7 @@
 #include <gazebo/physics/physics.hh>
 #include <control_toolbox/pid_ros.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include "gazebo_ros/node.hpp"
 
 // std C++
 #include <map>
@@ -48,7 +49,8 @@ private:
   physics::JointPtr actuated_joint_;
 
   std::vector<physics::JointPtr> virtual_joints_;
-  typedef std::shared_ptr<control_toolbox::PidROS> PidROSPtr;
+
+  using PidROSPtr = std::shared_ptr<control_toolbox::PidROS>;
   std::vector<PidROSPtr> pids_;
   std::vector<std::map<std::string, double>> pid_gains_;
 
@@ -58,7 +60,7 @@ private:
 
   std::string robot_namespace_;
 
-  std::shared_ptr<rclcpp::Node> ros_node_;
+  gazebo_ros::Node::SharedPtr ros_node_;
 };
 
 }  // namespace gazebo
