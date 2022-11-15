@@ -165,11 +165,11 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
 
     try
     {
-      double p_param = pid_gains_.at(i).at("p");
-      double i_param = pid_gains_.at(i).at("i");
-      double d_param = pid_gains_.at(i).at("d");
-      double i_max_param = pid_gains_.at(i).at("i_max");
-      double i_min_param = pid_gains_.at(i).at("i_min");
+      const double p_param = pid_gains_.at(i).at("p");
+      const double i_param = pid_gains_.at(i).at("i");
+      const double d_param = pid_gains_.at(i).at("d");
+      const double i_max_param = pid_gains_.at(i).at("i_max");
+      const double i_min_param = pid_gains_.at(i).at("i_min");
 
       pid.initPid(p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
 
@@ -205,8 +205,8 @@ void GazeboPalHey5::UpdateChild() {
   ignition::math::Angle new_actuator_angle = actuated_joint_->Position(0u);
 
   // Filter for noisy measure of actuated angle
-  double ang_err_rad = (actuator_angle_-new_actuator_angle).Radian();
-  double eps_angle_rad = 0.02;
+  const double ang_err_rad = (actuator_angle_-new_actuator_angle).Radian();
+  const double eps_angle_rad = 0.02;
   if( fabs( ang_err_rad ) > eps_angle_rad)
     actuator_angle_ = new_actuator_angle;
 
@@ -221,8 +221,8 @@ void GazeboPalHey5::UpdateChild() {
 
     if(pids_.at(i))
     {
-      double pos = virtual_joints_.at(i)->Position(0);
-      double error = new_angle.Radian() - pos;
+      const double pos = virtual_joints_.at(i)->Position(0);
+      const double error = new_angle.Radian() - pos;
       const double effort = pids_.at(i)->computeCommand(error,
                                                         rclcpp::Duration::from_seconds(0.001));
       virtual_joints_.at(i)->SetForce(0, effort);
