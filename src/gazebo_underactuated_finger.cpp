@@ -62,8 +62,17 @@ GazeboPalHey5::~GazeboPalHey5() {
 void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
   this->parent = _parent;
   this->world = _parent->GetWorld();
+  this->actuated_joint_name_ = "";
+  this->robot_namespace_ = "";
+  this->ros_node_ = gazebo_ros::Node::Get(_sdf);
 
-  this->actuated_joint_name_ = "actuated_finger_joint";
+  if (!_sdf->HasElement("namespace"))
+  {
+    RCLCPP_INFO_STREAM(ros_node_->get_logger(),
+                "GazeboPalHey5 Plugin missing <namespace>, defaults to '" <<
+                 this->robot_namespace_ << "'");
+  }
+
   if (!_sdf->HasElement("actuatedJoint"))
   {
     char error[200];
@@ -75,22 +84,6 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
     this->actuated_joint_name_ = _sdf->GetElement("actuatedJoint")->Get<std::string>();
   }
 
-  this->robot_namespace_ = "";
-  if (_sdf->HasElement("robotNamespace"))
-  {
-    this->robot_namespace_ =
-      _sdf->GetElement("robotNamespace")->Get<std::string>() + "/";
-
-    ros_node_ = std::make_shared<rclcpp::Node>(this->actuated_joint_name_,
-                                               this->robot_namespace_);
-  } else {
-    ros_node_ = std::make_shared<rclcpp::Node>(this->actuated_joint_name_);
-
-    RCLCPP_INFO(ros_node_->get_logger(),
-                "GazeboPalHey5 Plugin missing <robotNamespace>, defaults to \"%s\"",
-                this->robot_namespace_.c_str());
-  }
-
   if(!_sdf->HasElement("virtualJoint"))
   {
     char error[200];
@@ -99,6 +92,7 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
              this->robot_namespace_.c_str());
     gzthrow(error);
   }
+
   for(sdf::ElementPtr virtualJointPtr = _sdf->GetElement(std::string("virtualJoint"));
       virtualJointPtr;
       virtualJointPtr = _sdf->GetElement(std::string("virtualJoint")))
@@ -164,32 +158,32 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
 
     virtual_joints_.push_back(joint_ptr);
 
-    std::shared_ptr<rclcpp::Node> node_ptr(new rclcpp::Node(this->virtual_joint_names_.at(i),
-                                                            this->robot_namespace_ +
-                                                            "virtual_joints/" +
-                                                            this->virtual_joint_names_.at(i)));
-    PidROSPtr pid(new control_toolbox::PidROS(node_ptr, node_ptr->get_name()));
+    /// @bug Why is this unstable if we place it directly in a shared pointer?
+    auto pid = control_toolbox::PidROS(
+      ros_node_,
+      ros_node_->get_name() + std::string("/") + this->virtual_joint_names_.at(i));
 
     try
     {
-      double p_param = pid_gains_.at(i).at("p");
-      double i_param = pid_gains_.at(i).at("i");
-      double d_param = pid_gains_.at(i).at("d");
-      double i_max_param = pid_gains_.at(i).at("i_max");
-      double i_min_param = pid_gains_.at(i).at("i_min");
+      const double p_param = pid_gains_.at(i).at("p");
+      const double i_param = pid_gains_.at(i).at("i");
+      const double d_param = pid_gains_.at(i).at("d");
+      const double i_max_param = pid_gains_.at(i).at("i_max");
+      const double i_min_param = pid_gains_.at(i).at("i_min");
 
-      pid->initPid(p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
+      pid.initPid(p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
 
-      pids_.push_back(pid);
+      pids_.emplace_back(std::make_shared<control_toolbox::PidROS>(std::move(pid)));
     }
     catch (std::out_of_range&)
     {
-      RCLCPP_ERROR(node_ptr->get_logger(),
+      RCLCPP_ERROR(ros_node_->get_logger(),
                    "Did not find a complete pid configutation in the urdf for \"%s\"",
-                   this->virtual_joint_names_.at(i));
-      pids_.push_back(nullptr);
+                   this->virtual_joint_names_.at(i).c_str());
+      pids_.emplace_back(nullptr);
     }
   }
+
   // listen to the update event (broadcast every simulation iteration)
   this->update_connection_ =
     event::Events::ConnectWorldUpdateBegin(
@@ -203,7 +197,7 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf) {
    init_str += this->virtual_joint_names_.at(i);
    init_str += " ";
   }
-  RCLCPP_INFO(ros_node_->get_logger(), init_str);
+  RCLCPP_INFO_STREAM(ros_node_->get_logger(), init_str);
 }
 
 // Update the controller
@@ -211,8 +205,8 @@ void GazeboPalHey5::UpdateChild() {
   ignition::math::Angle new_actuator_angle = actuated_joint_->Position(0u);
 
   // Filter for noisy measure of actuated angle
-  double ang_err_rad = (actuator_angle_-new_actuator_angle).Radian();
-  double eps_angle_rad = 0.02;
+  const double ang_err_rad = (actuator_angle_-new_actuator_angle).Radian();
+  const double eps_angle_rad = 0.02;
   if( fabs( ang_err_rad ) > eps_angle_rad)
     actuator_angle_ = new_actuator_angle;
 
@@ -227,8 +221,8 @@ void GazeboPalHey5::UpdateChild() {
 
     if(pids_.at(i))
     {
-      double pos = virtual_joints_.at(i)->Position(0);
-      double error = new_angle.Radian() - pos;
+      const double pos = virtual_joints_.at(i)->Position(0);
+      const double error = new_angle.Radian() - pos;
       const double effort = pids_.at(i)->computeCommand(error,
                                                         rclcpp::Duration::from_seconds(0.001));
       virtual_joints_.at(i)->SetForce(0, effort);
