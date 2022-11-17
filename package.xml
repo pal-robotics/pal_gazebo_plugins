@@ -8,7 +8,7 @@
   <maintainer email="adolfo.rodriguez@pal-robotics.com">Adolfo Rodriguez Tsouroukdissian</maintainer>
   <maintainer email="luca.marchionni@pal-robotics.com">Luca Marchionni</maintainer>
 
-  <license>BSD</license>
+  <license>Apache License 2.0</license>
 
   <url type="repository">https://github.com/pal-robotics/pal_gazebo_plugins</url>
 
