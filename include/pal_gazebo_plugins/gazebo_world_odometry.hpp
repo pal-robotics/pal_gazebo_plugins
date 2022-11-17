@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef GAZEBO_PLUGINS__GAZEBO_ROS_P3D_HPP_
-#define GAZEBO_PLUGINS__GAZEBO_ROS_P3D_HPP_
-
-#include <gazebo/physics/physics.hh>
-#include <gazebo/common/Plugin.hh>
+#ifndef PAL_GAZEBO_PLUGINS__GAZEBO_WORLD_ODOMETRY_HPP_
+#define PAL_GAZEBO_PLUGINS__GAZEBO_WORLD_ODOMETRY_HPP_
 
 #include <memory>
+
+#include "gazebo/common/Plugin.hh"
+#include "gazebo/physics/physics.hh"
+
 
 namespace gazebo_plugins
 {
@@ -82,4 +83,4 @@ private:
 
 }  // namespace gazebo_plugins
 
-#endif  // GAZEBO_PLUGINS__GAZEBO_ROS_P3D_HPP_
+#endif  // PAL_GAZEBO_PLUGINS__GAZEBO_WORLD_ODOMETRY_HPP_

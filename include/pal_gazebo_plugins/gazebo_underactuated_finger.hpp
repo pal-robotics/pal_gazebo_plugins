@@ -9,26 +9,29 @@
 #ifndef PAL_GAZEBO_PLUGINS__GAZEBO_UNDERACTUATED_FINGER_HPP_
 #define PAL_GAZEBO_PLUGINS__GAZEBO_UNDERACTUATED_FINGER_HPP_
 
-
-// Gazebo
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
-#include <control_toolbox/pid_ros.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include "gazebo_ros/node.hpp"
-
 // std C++
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace gazebo {
+// Gazebo
+#include "control_toolbox/pid_ros.hpp"
+#include "gazebo/common/common.hh"
+#include "gazebo/physics/physics.hh"
+
+#include "gazebo_ros/node.hpp"
+#include "rclcpp/rclcpp.hpp"
+
+
+namespace gazebo
+{
 
 class Joint;
 class Entity;
 
-class GazeboPalHey5 : public ModelPlugin {
+class GazeboPalHey5 : public ModelPlugin
+{
 public:
   GazeboPalHey5();
   ~GazeboPalHey5();

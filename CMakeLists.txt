@@ -29,32 +29,32 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Plugins
 
- add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
- target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES})
- ament_target_dependencies(gazebo_underactuated_finger
-   rclcpp
-   control_toolbox
- )
+add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
+target_link_libraries(gazebo_underactuated_finger ${GAZEBO_LIBRARIES})
+ament_target_dependencies(gazebo_underactuated_finger
+  rclcpp
+  control_toolbox
+)
 
- add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
- target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
- ament_target_dependencies(pal_gazebo_collisions
-   rclcpp
-   gazebo_msgs
- )
+add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
+target_link_libraries(pal_gazebo_collisions ${GAZEBO_LIBRARIES})
+ament_target_dependencies(pal_gazebo_collisions
+  rclcpp
+  gazebo_msgs
+)
 
- add_library(gazebo_world_odometry SHARED src/gazebo_world_odometry.cpp)
- target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES})
- ament_target_dependencies(gazebo_world_odometry
-   rclcpp
-   nav_msgs
-   tf2_geometry_msgs
- )
+add_library(gazebo_world_odometry SHARED src/gazebo_world_odometry.cpp)
+target_link_libraries(gazebo_world_odometry ${GAZEBO_LIBRARIES})
+ament_target_dependencies(gazebo_world_odometry
+  rclcpp
+  nav_msgs
+  tf2_geometry_msgs
+)
 
 install(TARGETS
-   gazebo_underactuated_finger
-   pal_gazebo_collisions
-   gazebo_world_odometry
+  gazebo_underactuated_finger
+  pal_gazebo_collisions
+  gazebo_world_odometry
   DESTINATION lib/${PROJECT_NAME}
   LIBRARY DESTINATION lib
 )
