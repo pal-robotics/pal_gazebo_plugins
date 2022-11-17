@@ -1,21 +1,19 @@
-/*
- * Copyright 2019 PAL Robotics SL. All Rights Reserved
- *
- * Unauthorized copying of this file, via any medium is strictly prohibited,
- * unless it was supplied under the terms of a license agreement or
- * nondisclosure agreement with PAL Robotics SL. In this case it may not be
- * copied or disclosed except in accordance with the terms of that agreement.
- */
+// Copyright (c) 2022 PAL Robotics S.L. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #ifndef PAL_GAZEBO_PLUGINS__GAZEBO_UNDERACTUATED_FINGER_HPP_
 #define PAL_GAZEBO_PLUGINS__GAZEBO_UNDERACTUATED_FINGER_HPP_
-
-
-// Gazebo
-#include <gazebo/common/common.hh>
-#include <gazebo/physics/physics.hh>
-#include <control_toolbox/pid_ros.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include "gazebo_ros/node.hpp"
 
 // std C++
 #include <map>
@@ -23,12 +21,23 @@
 #include <string>
 #include <vector>
 
-namespace gazebo {
+// Gazebo
+#include "control_toolbox/pid_ros.hpp"
+#include "gazebo/common/common.hh"
+#include "gazebo/physics/physics.hh"
+
+#include "gazebo_ros/node.hpp"
+#include "rclcpp/rclcpp.hpp"
+
+
+namespace gazebo
+{
 
 class Joint;
 class Entity;
 
-class GazeboPalHey5 : public ModelPlugin {
+class GazeboPalHey5 : public ModelPlugin
+{
 public:
   GazeboPalHey5();
   ~GazeboPalHey5();
