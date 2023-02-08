@@ -8,6 +8,59 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Merge branch 'linters' into 'humble-devel'
+  Cleanup and linters
+  See merge request common/pal_gazebo_plugins!20
+* update maintainers
+* update copyright
+* add license
+* add CONTRIBUTING.md
+* linters
+* rm ros1 plugins
+* Merge branch 'fix_underactuated_finger' into 'humble-devel'
+  Fix underactuated finger
+  See merge request common/pal_gazebo_plugins!19
+* syntax fixes
+* fix seg fault when using pointers
+* fix logging errors
+* add missing dependencies
+* Merge branch 'comment_gazebo_underactuated_finger' into 'ros2'
+  comment gazebo_underactuated_finger plugin
+  See merge request common/pal_gazebo_plugins!18
+* comment gazebo_underactuated_finger plugin
+* Merge branch 'foxy_obstacle_avoidance' into 'ros2'
+  placeholders and change to gazebo node
+  See merge request common/pal_gazebo_plugins!16
+* Merge branch 'world-odometry-migration' into 'ros2'
+  World odometry migration to ros2
+  See merge request common/pal_gazebo_plugins!15
+* create gazebo world odometry plugin based on p3d
+* set parameter range without steps
+* placeholders and change to gazebo node
+* World odometry migration to ros2
+* Merge branch 'collisions_plugin_ros2' into 'ros2'
+  ros2 collisions plugin
+  See merge request common/pal_gazebo_plugins!14
+* ros2 collisions plugin
+* Merge branch 'ferrum-devel' into ros2
+* add format tests
+* Merge branch 'ros2' of gitlab:common/pal_gazebo_plugins into ros2
+* change installation of .h to .hpp
+* Merge branch 'ros2' of gitlab:common/pal_gazebo_plugins into ros2
+* change installations .h to .hpp
+* change .h to .hpp
+* change Duration format to ros2
+* Merge branch 'ros2' of gitlab:common/pal_gazebo_plugins into ros2
+* shared library
+* ament package
+* package.xml
+* shared_ptr error
+* compilation repair
+* ros2 migration initial commit
+* Contributors: Jordan Palacios, Noel Jimenez, Noel Jimenez Garcia, cescfolch, victor
+
 2.0.3 (2021-08-10)
 ------------------
 * Merge branch 'fix_odometry_link' into 'ferrum-devel'
