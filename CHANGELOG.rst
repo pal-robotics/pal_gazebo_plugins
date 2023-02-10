@@ -8,8 +8,8 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+4.0.1 (2023-02-10)
+------------------
 * Merge branch 'fix_dependency' into 'humble-devel'
   change gazebo dependency to gazebo_dev
   See merge request common/pal_gazebo_plugins!21
