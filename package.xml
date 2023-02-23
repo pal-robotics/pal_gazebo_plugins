@@ -15,7 +15,7 @@
 
   <author>Jose Capriles</author>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
   <depend>gazebo_dev</depend>
   <depend>gazebo_ros</depend>
