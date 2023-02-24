@@ -8,6 +8,14 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Merge branch 'gazebo_dev_libraries' into 'humble-devel'
+  Switch to ament_cmake_auto
+  See merge request common/pal_gazebo_plugins!23
+* switch to ament_cmake_auto
+* Contributors: Jordan Palacios, Noel Jimenez
+
 4.0.2 (2023-02-14)
 ------------------
 * Merge branch 'fix_header' into 'humble-devel'
