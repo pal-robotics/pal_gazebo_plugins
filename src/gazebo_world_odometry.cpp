@@ -225,8 +225,7 @@ void GazeboWorldOdometryPrivate::OnUpdate(const gazebo::common::UpdateInfo & inf
   }
 
   // Differentiate to get accelerations
-  double tmp_dt = current_time.Double() - last_time_.Double();
-  if (tmp_dt == 0) {
+  if (current_time - last_time_ == gazebo::common::Time::Zero) {
     return;
   }
 #ifdef IGN_PROFILER_ENABLE
