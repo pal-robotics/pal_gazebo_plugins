@@ -100,7 +100,7 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       sdf::ElementPtr pidGainsPtr = virtualJointPtr->GetElement(std::string("pid_gains"));
       std::map<std::string, double> pidGains;
 
-      for (std::string const & gain : {"p", "i", "d", "i_max", "i_min"}) {
+      for (const auto & gain : {"p", "i", "d", "i_max", "i_min"}) {
         if (pidGainsPtr->HasElement(std::string(gain))) {
           pidGains.emplace(gain, pidGainsPtr->GetElement(std::string(gain))->Get<double>());
         }
