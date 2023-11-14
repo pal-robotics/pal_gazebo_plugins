@@ -11,6 +11,7 @@
 
   <license>Apache License 2.0</license>
 
+  <url type="website">https://github.com/pal-robotics/pal_gazebo_plugins</url>
   <url type="repository">https://github.com/pal-robotics/pal_gazebo_plugins</url>
 
   <author>Jose Capriles</author>
