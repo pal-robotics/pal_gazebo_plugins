@@ -156,7 +156,13 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       const double i_max_param = pid_gains_.at(i).at("i_max");
       const double i_min_param = pid_gains_.at(i).at("i_min");
 
-      pid.initPid(p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
+#if CONTROL_TOOLBOX_VERSION_MAJOR >= 4
+      pid.initialize_from_args(
+        p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
+#else
+      pid.initPid(
+        p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
+#endif
 
       pids_.emplace_back(std::make_shared<control_toolbox::PidROS>(std::move(pid)));
     } catch (std::out_of_range &) {
@@ -208,9 +214,15 @@ void GazeboPalHey5::UpdateChild()
     if (pids_.at(i)) {
       const double pos = virtual_joints_.at(i)->Position(0);
       const double error = new_angle.Radian() - pos;
+
+#if CONTROL_TOOLBOX_VERSION_MAJOR >= 4
+      const double effort = pids_.at(i)->compute_command(
+        error, rclcpp::Duration::from_seconds(0.001));
+#else
       const double effort = pids_.at(i)->computeCommand(
-        error,
-        rclcpp::Duration::from_seconds(0.001));
+        error, rclcpp::Duration::from_seconds(0.001));
+#endif
+
       virtual_joints_.at(i)->SetForce(0, effort);
     } else {
       virtual_joints_.at(i)->SetPosition(0u, new_angle.Radian());

@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+add_compile_definitions(CONTROL_TOOLBOX_VERSION_MAJOR=${control_toolbox_VERSION_MAJOR})
+
 ## Plugins
 ament_auto_add_library(gazebo_underactuated_finger SHARED src/gazebo_underactuated_finger.cpp)
 ament_auto_add_library(pal_gazebo_collisions SHARED src/pal_gazebo_collisions.cpp)
