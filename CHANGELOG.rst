@@ -8,8 +8,8 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
-Forthcoming
------------
+4.0.6 (2025-04-25)
+------------------
 * Fix control_toolbox deprecation warnings
 * Contributors: Noel Jimenez
 
