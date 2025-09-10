@@ -8,6 +8,11 @@ Changelog for package pal_gazebo_plugins
 * Added gazebo world odometry that outputs rpy
 * Contributors: Hilario Tome
 
+Forthcoming
+-----------
+* Fix ament_auto warning about headers install destination
+* Contributors: Noel Jimenez
+
 4.0.6 (2025-04-25)
 ------------------
 * Fix control_toolbox deprecation warnings
