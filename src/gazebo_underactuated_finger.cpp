@@ -145,9 +145,14 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     virtual_joints_.push_back(joint_ptr);
 
     /// @bug Why is this unstable if we place it directly in a shared pointer?
-    auto pid = control_toolbox::PidROS(
-      ros_node_,
-      ros_node_->get_name() + std::string("/") + this->virtual_joint_names_.at(i));
+    const std::string prefix =
+      ros_node_->get_name() + std::string("/") + this->virtual_joint_names_.at(i);
+
+#if CONTROL_TOOLBOX_VERSION_MAJOR >= 4
+    auto pid = control_toolbox::PidROS(ros_node_, prefix, prefix);
+#else
+    auto pid = control_toolbox::PidROS(ros_node_, prefix);
+#endif
 
     try {
       const double p_param = pid_gains_.at(i).at("p");
@@ -157,8 +162,10 @@ void GazeboPalHey5::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
       const double i_min_param = pid_gains_.at(i).at("i_min");
 
 #if CONTROL_TOOLBOX_VERSION_MAJOR >= 4
+      auto antiwindup = control_toolbox::AntiWindupStrategy();
+      antiwindup.set_type("none");
       pid.initialize_from_args(
-        p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
+        p_param, i_param, d_param, i_max_param, i_min_param, antiwindup, false);
 #else
       pid.initPid(
         p_param, i_param, d_param, i_max_param, i_min_param, /*antiwindup*/ false);
